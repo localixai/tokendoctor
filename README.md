@@ -115,7 +115,7 @@ tokendoctor-selfcheck [--log <file>] [--json]                  # what really loa
 <summary><strong>What it costs to keep installed</strong></summary>
 
 The skills are user-invoked only (`disable-model-invocation`). `claude plugin details
-tokendoctor@tokendoctor` estimates about 160 tokens of always-on cost for the four of them. The
+tokendoctor@tokendoctor` estimates about 235 tokens of always-on cost for the five of them. The
 plugin has no MCP server. Its hooks module adds the optimize tools (`mcp__tokendoctor__*`) behind
 ToolSearch, so only their names are listed until `/tokendoctor:optimize` loads them. `/tokendoctor`
 and the slide run in the hooks module too, with no model call, so they add no tokens. Its one command

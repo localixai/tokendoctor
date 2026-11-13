@@ -47,6 +47,6 @@ Then restart Claude Code.
 
 ## What it costs to keep installed
 
-The skills are user-invoked only (`disable-model-invocation`). `claude plugin details tokendoctor@tokendoctor` estimates about 160 tokens of always-on cost for them. The plugin has no MCP server. Its hooks module adds the optimize tools (`mcp__tokendoctor__*`) behind ToolSearch, so only their names are listed until `/tokendoctor:optimize` loads them.
+The skills are user-invoked only (`disable-model-invocation`). `claude plugin details tokendoctor@tokendoctor` estimates about 235 tokens of always-on cost for the five of them. The plugin has no MCP server. Its hooks module adds the optimize tools (`mcp__tokendoctor__*`) behind ToolSearch, so only their names are listed until `/tokendoctor:optimize` loads them.
 
 `/tokendoctor` and the slide run in the hooks module too, with no model call, so they add no tokens. Its one command hook runs `tokendoctor-record` in the background when a session starts. The hook is `async` and prints nothing, so it adds no tokens. It appends each finished day's totals to `~/.claude/tokendoctor/history.jsonl`, so the trend outlives Claude Code's transcript cleanup.
