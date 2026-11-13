@@ -1,8 +1,10 @@
 # Recording the landing demo
 
-The demo on the landing is a real Claude Code session recorded with asciinema and replayed by
-`asciinema-player` (`src/components/home/DemoFilm.tsx`). It is text, not video: crisp, selectable,
-about 100 KB.
+The demo on the landing is a real Claude Code session, with real data, recorded with asciinema. It
+is never staged or written by hand: to change it, record again. The landing's hero names it
+(`film` in `content/landing.ts`) and the template's film player (`src/features/film`, xterm.js)
+replays it at the pace it was recorded, its chapters from the cast's markers. It is text, not
+video: crisp, selectable, about 100 KB.
 
 ## Re-record
 
@@ -15,8 +17,9 @@ env -u CLAUDECODE -u CLAUDE_CODE_ENTRYPOINT -u CLAUDE_CODE_SESSION_ID -u CLAUDE_
   asciinema rec --headless --window-size 110x36 --overwrite \
     -c "expect site/scripts/record-demo.exp $PWD" site/scripts/demo.raw.cast
 python3 site/scripts/polish-cast.py site/scripts/demo.raw.cast site/public/demo.cast
-# The README GIF, black ground and the landing player's palette:
-agg --theme 0a0a0a,e6e6e6,1a1a1a,ef7a6d,8bd49c,e7c97a,8fb6e8,c3a6f0,7fd0d6,cfcfcf,6b6b6b,f39185,a3e0b1,f0d897,a9c8f0,d3bdf5,9adde2,ffffff \
+# The README GIF, in the player's colours (--panel, --panel-text and --ansi-0..15 in
+# src/shared/styles/global.css):
+agg --theme 000000,e6e6e6,1a1a1a,ef7a6d,8bd49c,e7c97a,8fb6e8,c3a6f0,7fd0d6,cfcfcf,7c7c7c,f39185,a3e0b1,f0d897,a9c8f0,d3bdf5,9adde2,ffffff \
   --font-size 22 --speed 1.25 --fps-cap 24 --last-frame-duration 4 site/public/demo.cast docs/demo.gif
 ```
 
@@ -29,13 +32,13 @@ agg --theme 0a0a0a,e6e6e6,1a1a1a,ef7a6d,8bd49c,e7c97a,8fb6e8,c3a6f0,7fd0d6,cfcfc
 - **expect only relays output while it is reading.** `sleep` between `send`s records nothing after
   the `spawn` line. Wait with `expect -timeout N eof {} timeout {}` (the `wait` proc in the script).
 - **Use `--headless` and a fixed `--window-size`.** The recording does not depend on the terminal
-  you run it from, and 110x36 fits the landing frame.
+  you run it from; the player fits the cast's 110x36 to the hero's frame.
 - **Fixed waits, then trim.** Waiting for the model by pattern is fragile in a TUI; wait generously
   (80 s for a skill) and let `polish-cast.py` cut the dead time.
 - **Polish in the file, not in the player.** `polish-cast.py` keeps typing at a human pace, runs
   the model's thinking and streaming fast, adds a pause after each answer to read it, and adds
-  chapter markers. The player then only sets a mild `speed`; an `idleTimeLimit` there would also
-  cut the reading pauses.
+  chapter markers. The player has no speed or idle limit of its own, so the file's pace is the
+  one people see.
 - **Pick what goes in the frame.** A model answer can be wrong on camera (a first take had the
   audit claim a setting was missing when it was set). Prefer a skill answer you have read, plus a
   deterministic command (`!tokendoctor-sessions --by day`).
