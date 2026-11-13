@@ -48,7 +48,8 @@ export function Film({ src, label }: { src: string; label: string }) {
   useEffect(() => {
     let alive = true;
     let cleanup = () => {};
-    const fonts = document.fonts.load('14px Mono').catch(() => []);
+    // The block elements are a face of their own (global.css), loaded only for text that has them.
+    const fonts = Promise.all([document.fonts.load('14px Mono'), document.fonts.load('14px Mono', '\u2588')]).catch(() => []);
     const styles = import('@xterm/xterm/css/xterm.css');
     void Promise.all([import('@xterm/xterm'), fetch(src).then((r) => r.text()), fonts, styles]).then(async ([{ Terminal }, text]) => {
       const node = host.current;
