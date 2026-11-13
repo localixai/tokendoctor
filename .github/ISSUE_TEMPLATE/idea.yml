@@ -1,0 +1,16 @@
+name: A check or a report
+description: Something tokendoctor should notice, measure or offer to change
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What it should notice
+      description: The case in your own use, before the solution. Numbers from your sessions help most.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Where Claude Code documents it
+      description: A link to the docs for the setting or behaviour, if there is one.
