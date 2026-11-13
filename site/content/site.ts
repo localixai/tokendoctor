@@ -32,6 +32,7 @@ const site: SiteConfig = {
     ],
     action: { label: 'Install', href: '/#start' },
   },
+  maker: { label: 'Localix Lab', href: 'https://localix.ai' },
   footer: {
     note: 'tokendoctor is MIT-licensed and open source.',
     links: [
