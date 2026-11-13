@@ -16,7 +16,7 @@
   ],
   "icon": "./.claude-plugin/icon.png",
   "homepage": "https://tokendoctor.dev",
-  "repository": "https://github.com/rsaryev/tokendoctor",
+  "repository": "https://github.com/localixai/tokendoctor",
   "userConfig": {
     "slide": {
       "type": "boolean",

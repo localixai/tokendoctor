@@ -67,7 +67,7 @@ your own sessions at smaller windows before anything changes.
 ## Install
 
 ```bash
-claude plugin marketplace add rsaryev/tokendoctor
+claude plugin marketplace add localixai/tokendoctor
 claude plugin install tokendoctor@tokendoctor
 ```
 

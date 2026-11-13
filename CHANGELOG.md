@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **The repository moved to github.com/localixai/tokendoctor**, with the rest of Localix Lab's
+  tools. Install with `claude plugin marketplace add localixai/tokendoctor`; the plugin is still
+  `tokendoctor@tokendoctor`. The old address, and a marketplace already added from it, redirect.
+
 ## 0.6.0
 
 - **Transcripts of any size.** `sessions`, `replay`, `dashboard` and the history hook read each

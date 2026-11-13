@@ -8,7 +8,7 @@
 
 ## Install
 
-- `claude plugin marketplace add rsaryev/tokendoctor`
+- `claude plugin marketplace add localixai/tokendoctor`
 - `claude plugin install tokendoctor@tokendoctor`
 
 ## Use
@@ -24,4 +24,4 @@
 
 ## Links
 
-- Source and the full rule list: https://github.com/rsaryev/tokendoctor
+- Source and the full rule list: https://github.com/localixai/tokendoctor
