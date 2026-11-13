@@ -1,4 +1,4 @@
-import { expect, test } from 'claude-code/testing'
+import { expect, test, type TestBody } from 'claude-code/testing'
 import type { ContextCategory, SessionCompacted, SessionContextBreakdown, SessionMessage } from 'claude-code'
 import { fileRead } from '../lib/reads.mjs'
 
@@ -25,7 +25,7 @@ function call(id: string, tool: string, input: Record<string, unknown>): Session
 
 // Ten reads, then `extra`, at just past 25% of 387K: one 5K output frees enough, so the one that goes
 // shows which the slide ranks first.
-async function first($: Parameters<Parameters<typeof test>[2]>[0], on: Parameters<Parameters<typeof test>[2]>[1], extra: SessionMessage[], head: SessionMessage[] = []) {
+async function first($: Parameters<TestBody>[0], on: Parameters<TestBody>[1], extra: SessionMessage[], head: SessionMessage[] = []) {
   const messages: SessionMessage[] = [{ role: 'user', text: 'Fix the parser', toolUses: [], handle: 'h-p' }, ...head]
   for (let i = 0; i < 10; i++) messages.push(...call(`t${i}`, 'Read', { file_path: `/repo/src/f${i}.ts` }))
   messages.push(...extra)

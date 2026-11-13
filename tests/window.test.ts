@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 import type { ContextCategory, On, SessionCompacted, SessionContextBreakdown, SessionMessage } from 'claude-code'
-import { calibrate } from '../hooks/window.ts'
+import { calibrate } from '../hooks/window'
 
 const MARKER = 'elided by tokendoctor to save context'
 const THRESHOLD = 387_000

@@ -27,7 +27,7 @@ sends nothing anywhere. GitHub `localixai/tokendoctor`, site https://tokendoctor
 | `npm test` | `lib/` and `bin/`. Run it before every push; CI runs it on Node 20 and 22. |
 | `npm run test:mod` | The hooks module, on a copy of the plugin without `bench/tasks`. Needs `claude`. |
 | `npm run docs:check` | Every settings key and variable tokendoctor names, against Claude Code's current docs. Network. |
-| `npm run validate` | `claude plugin validate . --strict`. |
+| `npm run validate` | `claude plugin validate . --strict`: the manifests, and the hooks module and `tests/` type-checked against the running Claude Code's types. Passes; keep it so (import a plugin file without its `.ts` suffix, and build the engine's values in full, as `tests/register.test.ts`'s helpers do). |
 | `claude --plugin-dir .` | Try the working tree in a real session without installing it. |
 
 The site has its own commands in `site/` (`npm run check` before a push that touches it).

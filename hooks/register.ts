@@ -1,5 +1,5 @@
 import type { EngineInterface, Register } from 'claude-code'
-import { calibrate, chars, dedupe, IMAGE_TOKENS, imagesIn, slide } from './window.ts'
+import { calibrate, chars, dedupe, IMAGE_TOKENS, imagesIn, slide } from './window'
 import * as menu from '../lib/console.mjs'
 
 // Tools for /tokendoctor:optimize. Reading tools run without a prompt. A change runs only after the
