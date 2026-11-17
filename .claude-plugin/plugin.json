@@ -15,7 +15,7 @@
     "audit"
   ],
   "icon": "./.claude-plugin/icon.png",
-  "homepage": "https://tokendoctor.dev",
+  "homepage": "https://tokendoctor.localix.ai",
   "repository": "https://github.com/localixai/tokendoctor",
   "userConfig": {
     "slide": {

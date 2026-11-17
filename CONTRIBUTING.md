@@ -31,7 +31,7 @@ the figure, and say in the pull request which run it is. A benchmark run is alwa
 
 ## The site
 
-`site/` is tokendoctor.dev. `npm run check` in it before a push that touches it; a push to `main`
+`site/` is tokendoctor.localix.ai. `npm run check` in it before a push that touches it; a push to `main`
 publishes it.
 
 ## Releases

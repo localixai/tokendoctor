@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://tokendoctor.dev">Website</a> ·
+  <a href="https://tokendoctor.localix.ai">Website</a> ·
   <a href="#install">Install</a> ·
   <a href="CHANGELOG.md">Changelog</a>
 </p>

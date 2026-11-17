@@ -29,7 +29,7 @@
     "typescript": "^6.0.0",
     "vite": "^8.0.0"
   },
-  "description": "tokendoctor's landing page and docs, tokendoctor.dev, made from the llx-sitekit template.",
+  "description": "tokendoctor's landing page and docs, tokendoctor.localix.ai, made from the llx-sitekit template.",
   "sitekit": {
     "template": "https://github.com/rsaryev/llx-sitekit.git",
     "branch": "main",

@@ -1,6 +1,6 @@
 # The site
 
-tokendoctor.dev: the landing page and the docs of tokendoctor, as a folder of the plugin's
+tokendoctor.localix.ai: the landing page and the docs of tokendoctor, as a folder of the plugin's
 repository. It was made from the [llx-sitekit](https://github.com/rsaryev/llx-sitekit) template
 (its commit `6d1d483`) and keeps the template's layout, so [AGENTS.md](AGENTS.md) here holds for
 every change in this folder. The pages AGENTS.md points to (`structure.md`, `writing-docs.md` and

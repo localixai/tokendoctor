@@ -3,7 +3,7 @@ import type { SiteConfig } from '@/shared/config';
 // What the site knows about itself: the product's name, where the site is published, the
 // repository, how the plugin is installed.
 const GITHUB = 'https://github.com/localixai/tokendoctor';
-const URL = 'https://tokendoctor.dev';
+const URL = 'https://tokendoctor.localix.ai';
 const DESCRIPTION =
   'The same Claude Code for up to 38% less. See what your Claude Code use overpays, fix it, undo it any time. Runs on your machine.';
 

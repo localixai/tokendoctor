@@ -2,7 +2,7 @@
 
 A Claude Code plugin from Localix Lab: it shows what a person's Claude Code use overpays, fixes it
 with a diff they approve, and puts any change back. Everything runs on their machine; the plugin
-sends nothing anywhere. GitHub `localixai/tokendoctor`, site https://tokendoctor.dev.
+sends nothing anywhere. GitHub `localixai/tokendoctor`, site https://tokendoctor.localix.ai.
 
 ## Layout
 
@@ -17,7 +17,7 @@ sends nothing anywhere. GitHub `localixai/tokendoctor`, site https://tokendoctor
 | `test/` | Node tests for `lib/` and `bin/` (`npm test`) |
 | `tests/` | The hooks module's tests (`npm run test:mod`, through `claude plugin test`) |
 | `bench/` | The benchmark: real Claude Code on fixed tasks, scored by acceptance tests |
-| `site/` | tokendoctor.dev |
+| `site/` | tokendoctor.localix.ai |
 | `llx/` | Not this repository: an ignored clone of another one, kept beside the work |
 
 ## Commands

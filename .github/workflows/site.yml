@@ -1,4 +1,4 @@
-# Checks site/ (tokendoctor.dev: the landing and the docs) on every change to it on main, and
+# Checks site/ (tokendoctor.localix.ai: the landing and the docs) on every change to it on main, and
 # publishes what it built to Cloudflare Pages, project token-doctor. Publishing needs two
 # repository secrets, CLOUDFLARE_API_TOKEN (Account > Cloudflare Pages > Edit) and
 # CLOUDFLARE_ACCOUNT_ID; until both are set the run only checks. Nothing here runs for a pull
