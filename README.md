@@ -9,15 +9,20 @@
 
 <p align="center">
   <strong>The same Claude Code for up to 38% less</strong>
+  <br>
+  Replays your own past sessions to show what each change would have saved, then changes only what you pick.
 </p>
 
 <p align="center">
-  See what your Claude Code use overpays, fix it, undo it any time. Runs on your machine.
+  <a href="https://github.com/localixai/tokendoctor/actions/workflows/ci.yml"><img src="https://github.com/localixai/tokendoctor/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/github/v/tag/localixai/tokendoctor?label=version" alt="Version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
 </p>
 
 <p align="center">
-  <a href="https://tokendoctor.localix.ai">Website</a> ·
-  <a href="#install">Install</a> ·
+  <a href="#install">Install</a> &bull;
+  <a href="https://tokendoctor.localix.ai/docs">Docs</a> &bull;
+  <a href="https://tokendoctor.localix.ai">Website</a> &bull;
   <a href="CHANGELOG.md">Changelog</a>
 </p>
 
@@ -25,44 +30,23 @@
   <img src="docs/demo.gif" alt="tokendoctor in a real Claude Code session: /tokendoctor:sessions, then the daily trend" width="880">
 </p>
 
-| Measured on its author's six weeks of real use | |
-|---|---|
-| Main-thread cost per request at API list prices, the month before against the week after a 400K window and Sonnet for subagents | **−38%** |
-| Context per request | **412K → 219K** |
-| The same sessions replayed at a 400K window: only the window changed | **−33%** of the main thread, **−20%** of all spend |
-| The slide against a summary, the same day of work ([bench](bench/README.md)) | **−19% cost, −33% time** |
-| A week of work in [bench](bench/README.md) (27 steps), Claude Code as it ships against every fix applied and the slide | **−11 to −21% cost** (medians of 2 and 3 runs; single runs −40% to +17%), all tests pass |
+**Your past sessions decide, not anyone's benchmark.** What a setting saves depends on how you
+work: how long your sessions run, which models you use, what the work is. A number from someone
+else's sessions, mine included, says little about yours. So tokendoctor starts by looking back at
+your own.
 
-**There is no one pill.** If your sessions rarely pass 400K tokens, the window changes nothing for
-you; a summary that lands just before you finish can cost more than it saves; your models, effort
-and work all move the number. So tokendoctor shows you yours first: `/tokendoctor:sessions` replays
-your own sessions at smaller windows before anything changes.
+**① Look back at your last 30 days.** `/tokendoctor:sessions` replays every session you had,
+request by request, at compaction windows of 200K, 300K, 400K and 600K, and shows what each would
+have cost. It only reads your transcripts, makes no model calls and changes nothing. The figure is
+an upper bound: a replay can't see work the model would have redone after a summary.
 
-<table>
-  <tr>
-    <td width="25%" valign="top">
-      <strong>See</strong><br>
-      <code>/tokendoctor:sessions</code> replays your own sessions at smaller windows and says what each would have saved, then where the tokens went.
-    </td>
-    <td width="25%" valign="top">
-      <strong>Fix</strong><br>
-      <code>/tokendoctor:optimize</code> runs 38 checks against the docs and applies the changes you pick, each shown as a diff first.
-    </td>
-    <td width="25%" valign="top">
-      <strong>Slide</strong><br>
-      <code>/tokendoctor slide on</code>: where Claude Code would summarize, old tool outputs go instead. No pause, the conversation stays word for word.
-    </td>
-    <td width="25%" valign="top">
-      <strong>Undo</strong><br>
-      <code>/tokendoctor undo</code> lists every change tokendoctor made and puts any one back. No model call, no tokens.
-    </td>
-  </tr>
-</table>
+**② Change only what your sessions show pays, and undo it.** `/tokendoctor:optimize` proposes
+changes from those numbers and checks your settings against Claude Code's docs; it applies only the
+ones you pick, each shown as a diff first. `/tokendoctor undo` puts any of them back.
 
-<p align="center">
-  <img src="docs/dashboard.png" alt="The author's tokendoctor dashboard: 57% of the spend was Claude re-reading the conversation" width="880"><br>
-  <sub><code>/tokendoctor:dashboard</code>: every token by day, model, effort, main thread and each subagent, context size and project. One local file; this is the author's own.</sub>
-</p>
+**③ Optional: slide instead of summarize.** When Claude Code would stop to summarize the
+conversation, tokendoctor drops old tool output instead and keeps every message. There is no model
+call, so it takes milliseconds, not a minute.
 
 ## Install
 
@@ -71,267 +55,70 @@ claude plugin marketplace add localixai/tokendoctor
 claude plugin install tokendoctor@tokendoctor
 ```
 
-Update with `claude plugin marketplace update tokendoctor` and `claude plugin update tokendoctor@tokendoctor`, then restart Claude Code. To try it without installing, clone the repository and run `claude --plugin-dir /path/to/tokendoctor`.
+Restart Claude Code and run `/tokendoctor:sessions` to see what your last 30 days would have cost
+at each window. Nothing changes until you pick it.
 
-## Use
+## What it found in mine
+
+Every request sends the whole conversation to the model. On models with a 1M window, Claude Code
+compacts only near 967K tokens, so the end of a long session is the expensive part. For me, two
+thirds of main-thread cost went to requests with more than 400K in context.
+
+So I set a 400K window and Sonnet for subagents. Comparing the month before with the week after,
+about 23K and 19K main-thread requests, context per request went from 412K to 219K and cost per
+request fell 38% at API list prices. That's one person's before and after, not a controlled
+experiment.
+
+The catch is more summaries, and each is a pause: 79 seconds on average in my sessions. That's
+what the slide is for. Your sessions may show something else entirely, which is the point of
+looking at them first.
+
+## What the benchmark shows
+
+On the [benchmark](bench/README.md), Claude Code builds a TypeScript project against tests it
+can't change, so a run counts only if the tests pass. Cost is per task, on Haiku 5.5:
+
+| Compared | Cost | Time |
+| --- | --- | --- |
+| Slide against a summary, a day of work | −19% | −33% |
+| Slide against a summary, an eval harness | −35% | −28% |
+| Slide against a summary, a short task | +6% | −17% |
+| The settings advice alone, against Claude Code as it ships | dearer in 3 of 4 runs | |
+| The advice and the slide, a week of work | −11% to −21% | |
+
+Every test passed in every run. The advice alone didn't pay here because these tasks rarely pass
+400K, which is where the window starts to matter. If your sessions don't either, your replay will
+show it, and you should leave your window alone. Every run, the losing ones too, is in
+[bench/HISTORY.md](bench/HISTORY.md).
+
+<p align="center">
+  <img src="docs/dashboard.png" alt="The author's tokendoctor dashboard: 57% of the spend was Claude re-reading the conversation" width="880"><br>
+  <sub><code>/tokendoctor:dashboard</code>: where every token went, by day, model, subagent and project. One local file; this one is mine.</sub>
+</p>
+
+## Commands
 
 | Command | What it does |
 | --- | --- |
-| `/tokendoctor:sessions [days]` | What a smaller window would have saved you (your sessions replayed), then where tokens went over the last 30 days (or `days`), with findings. Read-only. |
-| `/tokendoctor:audit` | Setting checks by severity, each linked to the docs, a read of your memory and CLAUDE.md, then the usage dashboard. Read-only. |
-| `/tokendoctor:dashboard [days]` | Builds and opens a local dashboard of every session on this machine: spend by day, kind of token, model, reasoning effort, main thread and each subagent type, context size, project and hour, with filters. One HTML file, no network. |
+| `/tokendoctor:sessions [days]` | Replays your past sessions (30 days, or `days`) at smaller windows: what each would have saved, then where your tokens went. Reads only. |
+| `/tokendoctor:audit` | Your settings, memory and CLAUDE.md checked against the docs, by severity. Reads only. |
+| `/tokendoctor:dashboard [days]` | Opens a local dashboard of every session on this machine. |
 | `/tokendoctor:optimize [focus]` | Proposes up to five changes from your numbers and applies the ones you pick. |
-| `/tokendoctor [name] [value]` | Shows the main settings, explains one or changes it. No model call, no tokens. |
-| `/tokendoctor fix <finding-id>` | Applies one audit fix after showing it, with a backup of the file. |
-| `/tokendoctor undo [n]` | Lists the changes tokendoctor made, newest first, and puts change `n` back. |
+| `/tokendoctor [name] [value]` | Shows, explains or changes a setting, with no model call. |
+| `/tokendoctor undo [n]` | Lists every change tokendoctor made and puts one back. |
 
-`/tokendoctor` is answered by the plugin itself, so it costs nothing. Tab completes the names
-(`window`, `slide`, `cache`, `effort`, `model`, `subagents`, and `/tokendoctor all` for the rest) and
-their values; `/tokendoctor window 400k` applies as typed, `/tokendoctor window reset` goes back to the
-default, `--project` or `--local` writes there instead of your user settings. A model name must be an
-alias (`opus`, `sonnet`, `haiku`) or a `claude-…` id.
+Nothing leaves your machine: the only network call is to two public pages of Claude Code's docs,
+once a day. It never switches your models on its own.
 
-`optimize` changes only settings on [the tunable list](lib/tunables.mjs) and `/config` rows. Every change opens a dialog that shows it and runs only on **Apply**; with no one to ask, as in a `-p` run, nothing changes. Hooks and permissions are never on the list.
+## Documentation
 
-<details>
-<summary><strong>From a shell</strong></summary>
-
-The plugin's `bin/` directory is on the Bash tool's PATH while it is enabled:
-
-```bash
-tokendoctor-audit [--project <dir>] [--json]
-tokendoctor-sessions [--days <n>] [--project <dir>] [--by day|week] [--json]
-tokendoctor-set --list | <key> <value>|--unset [--scope user|project|local] [--write]
-tokendoctor-apply <finding-id> [--scope user|project|local] [--project <dir>] [--write]
-tokendoctor-undo [--json] | <n> [--write]
-tokendoctor-replay [--days <n>] [--window 200k,400k] [--json]   # what a smaller window would have saved
-tokendoctor-org-install [--write] [--uninstall]                # the slide under a Team/Enterprise login (see below)
-tokendoctor-selfcheck [--log <file>] [--json]                  # what really loaded, from a debug log (one small Haiku request, or a log you have)
-```
-
-</details>
-
-<details>
-<summary><strong>What it costs to keep installed</strong></summary>
-
-The skills are user-invoked only (`disable-model-invocation`). `claude plugin details
-tokendoctor@tokendoctor` estimates about 235 tokens of always-on cost for the five of them. The
-plugin has no MCP server. Its hooks module adds the optimize tools (`mcp__tokendoctor__*`) behind
-ToolSearch, so only their names are listed until `/tokendoctor:optimize` loads them. `/tokendoctor`
-and the slide run in the hooks module too, with no model call, so they add no tokens. Its one command
-hook runs `tokendoctor-record` in the background when a session starts. The hook is `async` and
-prints nothing, so it adds no tokens. It appends each finished day's totals to
-`~/.claude/tokendoctor/history.jsonl`, so the trend outlives Claude Code's transcript cleanup.
-
-</details>
-
-<details>
-<summary><strong>The 38 setting checks</strong></summary>
-
-Errors are settings that are wrong or ignored, warnings are likely to cost real money, and info is worth a look. Rules that depend on a Claude Code release are skipped on older versions.
-
-| Finding | Severity | What it catches |
-| --- | --- | --- |
-| `settings-unreadable` | error | A settings file that exists but is not valid JSON, so nothing in it applies. |
-| `compact-threshold-undocumented` | error | `autoCompactThreshold` is not a Claude Code setting; the real key is `autoCompactWindow`. Fix removes it. |
-| `compact-env-bare-number` | error | `CLAUDE_CODE_AUTO_COMPACT_WINDOW` below 100,000 (a bare number is tokens, not thousands). |
-| `compact-window-unset` | warn | Models with a native 1M window compact only near 967K by default. Fix sets 400,000. |
-| `compact-window-small` | warn | A window so small that frequent compaction breaks the prompt cache. |
-| `prompt-caching-disabled` | warn | A `DISABLE_PROMPT_CACHING*` variable is set. |
-| `subagent-model-force` | warn | Every subagent, including reasoning ones, is forced onto one model. |
-| `effort-max-in-settings` | warn | `effortLevel: "max"` is not accepted in settings. Fix uses `xhigh`. |
-| `advisor-inactive` | warn | An advisor that will silently not run (telemetry or feature-flag fetching off, advisor below the main model, tool disabled). |
-| `fast-mode-enabled` | warn | `fastMode: true` saved as a default, so every session pays the higher fast-mode rate. Fix sets `fastModePerSessionOptIn`. |
-| `auto-compact-off` | warn | `DISABLE_AUTO_COMPACT` or `autoCompactEnabled: false`: history grows until the model window fills. Fix unsets the setting. |
-| `tool-search-off` | warn/info | `ENABLE_TOOL_SEARCH=false` loads every MCP tool definition into every request. |
-| `explore-default-model` | info | The built-in Explore agent runs on Opus on many accounts. Fix installs a Haiku, read-only override. |
-| `subagent-model-unset` | info | General-purpose subagents inherit an expensive main model. Fix sets `CLAUDE_CODE_SUBAGENT_MODEL=sonnet`. |
-| `main-model-expensive` | info | Opus or Fable as the default; suggests Sonnet. |
-| `agents-inherit-model` | info | Custom agents with no `model` run on the main model. |
-| `heavy-dirs-not-denied` | info | Large `target/`, `dist/`, `build/`, `coverage/`, `.turbo/` directories not excluded from reads. Fix adds `permissions.deny` rules. |
-| `large-lockfile-readable` | info | Lockfiles over 200 KB that a model can open in full. Fix adds a deny rule. |
-| `instructions-long` | info | `CLAUDE.md` plus its `@imports` over 200 lines. Path-scoped `.claude/rules` and skills cut the cost; imports do not. |
-| `compact-instructions-missing` | info | No `# Compact instructions` section to steer summaries. |
-| `context-surface` | info | Many skills, plugins or MCP servers loaded in every session. |
-| `duplicate-skills` | info | The same skill at user and project level. |
-| `thinking-tokens-env` | info | `MAX_THINKING_TOKENS` is ignored on adaptive-reasoning models. |
-| `prompt-cache-ttl-forced-short` | info | `FORCE_PROMPT_CACHING_5M` removes the one-hour cache some plans get. |
-| `agent-teams-enabled` | info | Agent teams multiply token use per teammate. |
-| `mcp-output-limit-raised` | info | A raised `MAX_MCP_OUTPUT_TOKENS`. |
-| `every-tool-hooks` | info | Hooks matching `*` on a tool event (Pre/PostToolUse, PostToolUseFailure, PermissionRequest) start a process per call. Latency, not tokens. Fix drops them after a dry run; read the warning first if a tool shows agent status from them. |
-| `idle-compaction-off` | info | `idleCompaction: false`: a long conversation is not compacted before its one-hour cache expires. Fix unsets it. |
-| `bash-output-raised` | info | `bashOutputMaxChars` or `BASH_MAX_OUTPUT_LENGTH` above the 30,000 default. |
-| `code-intelligence-missing` | info | The project has files for a language with an official language-server plugin (`typescript-lsp`, `pyright-lsp`, `gopls-lsp`, …) and it is not enabled. |
-| `settings-key-undocumented` | warn | A settings key that is not in today's settings reference: misspelled or removed, so it does nothing. |
-| `env-undocumented` | info | A `CLAUDE_…`/`ANTHROPIC_…`-style variable under `env` that today's docs do not list. |
-| `setting-needs-newer-version` | warn | A key or variable the docs say needs a newer Claude Code than the one installed. |
-| `slide-blocked-by-guard` | warn | The slide is on, but Claude Code's built-in guard sends compaction past the mods you install (a Team or Enterprise login, or managed settings), so it summarizes instead. Says to run `tokendoctor-org-install`. |
-| `compact-pct-override` | info/warn/error | `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`: where it puts the compaction point; a warning below 50%, an error when it is not a percent. |
-| `skill-model-switch` | info | A skill whose frontmatter names another model: each use reads the conversation uncached on that model. `context: fork` avoids it. |
-| `opusplan-cache` | info | `opusplan` switches models, and so caches, on every plan-mode toggle. |
-| `no-statusline` | info | No status line. Fix installs `tokendoctor-statusline.sh` and points `statusLine` at it (needs `jq`). One quiet line: `Opus 5.5 · api main* · 120k/367k · cache 1h · 5h 51% · week 35% · $24`. Tokens are shown against the point where Claude Code compacts; `cache 1h` is how long the prompt cache stays warm; a limit adds `→ 100% in 48m` only when, at the recent pace (5h: the last hour, week: the last day), it runs out before it resets. The finding also mentions the `token-weather` mod from [anthropics/claude-code-playground](https://github.com/anthropics/claude-code-playground/tree/main/claude-code/mods/token-weather) as an alternative (needs Claude Code 2.1.287+, shared as-is). |
-
-`templates/statusline.sh` is the status line script the fix installs into your Claude config folder.
-`templates/agents/` holds three generic subagents (`Explore`, `test-runner`, `docs-lookup`), each
-pinned to a small model with read-only or narrow tools. A plugin cannot override a built-in agent
-or ship `settings.json` keys such as `autoCompactWindow`, `env` or `permissions`, so the apply step
-copies the template into `~/.claude/agents/` or `.claude/agents/` and edits your settings files
-itself, with a backup.
-
-</details>
-
-<details>
-<summary><strong>Checked against today's docs and what really loaded</strong></summary>
-
-Claude Code changes every few days, so the audit does not trust a list frozen into the plugin:
-
-- It reads the current settings reference and environment variable list from code.claude.com, as
-  Markdown (every docs page is served at `…/docs/en/<page>.md`, indexed for models at
-  [llms.txt](https://code.claude.com/docs/llms.txt); a mirror such as context7 re-indexes on its own
-  schedule). Cached a day in `~/.claude/tokendoctor/docs`; `--offline` uses the cache only. Only those
-  public pages are fetched; nothing is sent. It flags settings keys Claude Code does not document
-  (`settings-key-undocumented`: a misspelled or removed key does nothing), variables of Claude Code's
-  own families it does not know (`env-undocumented`), and keys that need a newer release than yours
-  (`setting-needs-newer-version`).
-- It reads a `claude --debug` log of the last day, if you have one, and `tokendoctor-selfcheck` makes
-  one (one `claude -p` request on Haiku with no saved session; `--log <file>` reads one you have, at
-  no cost): which copy of tokendoctor loaded and in which tier, whether the built-in guard was seated,
-  the order of the mods on compaction, hooks that were skipped, the window Claude Code really
-  compacts at, and a skill listing over its budget (descriptions cut short).
-- The `/tokendoctor:audit` and `/tokendoctor:optimize` skills read a finding's doc page before they
-  explain or recommend it.
-- For whoever maintains tokendoctor, `npm run docs:check` checks every settings key and variable it
-  names against the current docs.
-
-</details>
-
-<details>
-<summary><strong>What the session report finds</strong></summary>
-
-| Finding | Severity | What it catches |
-| --- | --- | --- |
-| `late-compaction` | warn | Over 30% of main-thread cost spent with more than 400K tokens in context. |
-| `subagents-on-top-model` | warn | Subagents on Opus or Fable making over 5% of all cost. Forks always run on the main model. |
-| `long-sessions` | info | Sessions of 500+ turns, with their share of cost. |
-| `idle-cache-rebuilds` | info | The prompt cache rebuilt after it expired during a break. |
-| `images-read-repeatedly` | info | The same image read three or more times. |
-| `rereads-after-compaction` | info | Files read before a summary and read again within the next 10 requests: what the summary lost. Shown against slides when there are some. |
-
-</details>
-
-<details>
-<summary><strong>Slide the window instead of compacting</strong></summary>
-
-Off by default. With `/tokendoctor slide on` (or `tokendoctor-set tokendoctor.slide true --write`, or
-`/tokendoctor:optimize`), where Claude Code would compact, the plugin's hooks module elides old tool
-outputs into short pointers instead of summarizing, the way [llx](https://github.com/localixai/localix-cli)
-does. Every prompt, answer and decision stays word for word, and there is no summary pause.
-
-- What goes first: reads made stale by a later read or edit of the same file, then what edits wrote
-  (it is on disk), then the oldest outputs. The recent tail, outputs the model has not answered yet
-  and Agent results stay.
-- It frees down to `tokendoctor.slideTo` percent (default 25) of where Claude Code compacts, so slides
-  are rare. Each one re-sends the context once, as a summary does; a pointer is never touched again.
-- `/compact` still summarizes, and so does a slide that cannot free enough. Set a smaller window with
-  `autoCompactWindow` (for example 400000) and the slide works from it.
-- It takes idle compaction too (before the hour's cache expires); `/compact` and a plugin's
-  `$.session.compact` still summarize.
-- **Team and Enterprise logins, and machines with managed settings.** There Claude Code seats its
-  built-in guard, `cc-plugin-sec-default`, ahead of the mods you install, and it sends compaction past
-  them: the slide cannot run, and the audit and `/tokendoctor slide` say so. `tokendoctor-org-install`
-  installs tokendoctor as the machine's own mod, which runs after the guard: a root-owned copy in
-  the system folder and `managed-settings.d/50-tokendoctor.json` with `appendPlugins` (dry run first,
-  then one `sudo` command; `--uninstall` undoes it). Where your organization delivers its own managed
-  settings, files are ignored and only an administrator can add it.
-
-In one real session, at the same size: Claude Code's summary took 367K to 35K in **65.3 s**; the slide
-took 368K to 36K in **0.04 s**. Summaries in the author's real sessions take 79 s on average (109 of them, 22 September to 1 November).
-
-On [bench/](bench/README.md), Claude Code doing a TypeScript project against fixed acceptance tests,
-Haiku 5.5, a 100K window so that it compacts several times (medians). A short task with one
-compaction gains time but not money; the longer the work, the more the slide saves:
-
-| Task | Arm | Tests passed | Cost | Time | Waiting on compactions |
-| --- | --- | --- | --- | --- | --- |
-| a day of work (7 requests, 307 tests), 2 runs | summary | 307/307 | $0.186 | 1141 s | 103–137 s |
-| | slide | 307/307 | $0.151 (**−19%**) | 763 s (**−33%**) | under 1 s |
-| evalkit (an eval harness, 238 tests), 5 and 3 runs | summary | 238/238 | $0.149 | 656 s | about 50 s |
-| | slide | 238/238 | $0.096 (**−35%**) | 472 s (**−28%**) | under 1 s |
-| fixkit (12 bugs to find, 238 tests), 5 runs | summary | 238/238 | $0.037 | 154 s | about 16 s |
-| | slide | 238/238 | $0.039 (+6%) | 128 s (**−17%**) | under 1 s |
-
-The earlier, smaller runs of `node bench/window.mjs` (60 files of 300 lines read one by one, then a
-follow-up in the same session, 200K window) cost the same both ways:
-
-| Model | Arm | Cost | Compactions | Answers right |
-| --- | --- | --- | --- | --- |
-| Haiku 5.5 (3 runs) | summary | $0.581 | 3 | 5/5 |
-| Haiku 5.5 (3 runs) | slide to 25% | $0.580 | 3.7 | 5/5 |
-| Sonnet 5.5 (1 run) | summary | $2.93 | 3 | 5/5 |
-| Sonnet 5.5 (1 run) | slide to 25% | $2.99 | 3 | 5/5 |
-
-What a summary loses, measured with `--task recall`: the session starts with five decisions from the
-person, the files are deleted after reading, and the follow-up asks for the decisions and eight KEYs the
-model noted. Claude Code's summary kept them all: 6/6 and 8/8 in every run on both models. The slide
-did the same on Haiku 5.5 (3 runs, 2% dearer); on Sonnet 5.5 (1 run) it missed one KEY, which the
-model skipped noting in its first reply after a slide. So far no test shows the slide answering better,
-or worse: it saves time and money, not quality.
-
-</details>
-
-<details>
-<summary><strong>Limits</strong></summary>
-
-- It reads user, project and local settings files, `~/.claude.json` (the MCP server names, to count
-  them, and the plan type, to tell whether Claude Code's guard is seated), the managed settings files
-  in the system folder and the cached server-managed ones (only to find the guard and its own machine
-  copy), and your skill and agent folders. Managed settings it does not check against the rules.
-- The audit fetches two public pages of Claude Code's docs once a day (`--offline` to skip); nothing
-  else goes over the network, and nothing of yours is sent.
-- Whether a rule helps depends on your plan and workload. Findings explain the trade-off and link
-  to the documentation; decide for yourself.
-- Deny rules in `permissions.deny` are best-effort for search tools and do not stop a read through
-  Bash.
-- Costs are dollars at each model's [Claude API list price](https://platform.claude.com/docs/en/about-claude/pricing)
-  (`lib/prices.mjs`: cache reads at 0.05x input on Opus 5.5 and Sonnet 5.5, 0.025x on Fable 5.1,
-  Haiku 5.5 priced by prompt length, fast mode, US-only inference, web search). On a Pro or Max plan
-  that is what the same work would cost on the API: Anthropic does not publish how plan limits weigh
-  each kind of token.
-- Claude Code bills some requests it does not write into transcripts: a summary compaction's own
-  request, titles, the small model that reads a page for WebFetch. Their cost is Claude Code's own
-  session total (its `cost-state` lines) minus the responses in the transcripts, where that total
-  holds; else the summaries are estimated from the context they read. Against the cost Claude Code
-  reported on [bench](bench/README.md)'s 78 runs: equal to the cent on 77, 7.7% over on one.
-- Sessions on other machines and transcripts Claude Code has already cleaned up are not counted,
-  except for days already in the history file.
-
-</details>
-
-<details>
-<summary><strong>Develop</strong></summary>
-
-```bash
-npm test               # node's built-in test runner, no dependencies
-npm run test:mod       # the hooks module's tests (claude plugin test)
-claude plugin validate .
-bun bench/run.ts --task fixkit --window 100000 --arm factory --arm factory+slide   # see bench/README.md
-```
-
-`test/private.test.mjs` fails if anything git would commit holds an API key or token, a home folder
-path or a temporary folder of the machine: benchmark results come from runs on someone's account, so
-only their summaries are committed and the transcripts stay local.
-
-The landing page lives in `site/` (`cd site && npm install && npm run dev`; `npm run build` prerenders
-it, `node scripts/og.mjs` redraws the social card). The demo is a real session recorded with
-asciinema; `site/scripts/RECORDING.md` says how to record it again.
-
-Rules are pure functions over a snapshot (`lib/rules.mjs`); reading the disk lives in
-`lib/collect.mjs` and writing in `lib/apply.mjs`. Adding a rule means adding one entry and its test.
-Session analysis is in `lib/sessions.mjs` and `lib/history.mjs`, the settings `tokendoctor-set` may
-change in `lib/tunables.mjs`, the `/tokendoctor` command in `lib/console.mjs`, the replay in
-`lib/replay.mjs`, the slide in `hooks/window.ts`, and the optimize tools in `hooks/register.ts`.
-
-</details>
+**[tokendoctor.localix.ai/docs](https://tokendoctor.localix.ai/docs)** has the rest: the
+[38 checks](https://tokendoctor.localix.ai/docs/audit), every
+[setting](https://tokendoctor.localix.ai/docs/settings),
+[how the slide works](https://tokendoctor.localix.ai/docs/slide) (and Team and Enterprise
+logins), the commands from a shell, the [measurements](https://tokendoctor.localix.ai/docs/proof)
+and the [limits](https://tokendoctor.localix.ai/docs/limits). To work on tokendoctor itself, see
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

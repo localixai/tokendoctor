@@ -1,7 +1,7 @@
 # tokendoctor
 
-A Claude Code plugin from Localix Lab: it shows what a person's Claude Code use overpays, fixes it
-with a diff they approve, and puts any change back. Everything runs on their machine; the plugin
+A Claude Code plugin from Localix Lab: it replays a person's past sessions to show what each change
+would have saved, applies only what they pick with a diff they approve, and puts any change back. Everything runs on their machine; the plugin
 sends nothing anywhere. GitHub `localixai/tokendoctor`, site https://tokendoctor.localix.ai.
 
 ## Layout

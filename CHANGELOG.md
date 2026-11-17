@@ -5,6 +5,14 @@
 - **The repository moved to github.com/localixai/tokendoctor**, with the rest of Localix Lab's
   tools. Install with `claude plugin marketplace add localixai/tokendoctor`; the plugin is still
   `tokendoctor@tokendoctor`. The old address, and a marketplace already added from it, redirect.
+- **A shorter README that leads with your own sessions:** what a change saves depends on how you
+  work, so it starts from the replay of your last 30 days; then how to install it, and what was
+  measured, the losing runs included (on the benchmark the advice alone was dearer than Claude Code
+  as it ships in 3 of 4 runs; the savings came with the slide). The reference (the 38 checks, the
+  settings, the slide, the limits) is on tokendoctor.localix.ai/docs.
+- **The description says what it does first:** "Replays your own past sessions to show what each
+  change would have saved, then changes only what you pick", the same in the plugin's manifests, the
+  marketplace, the site and the README.
 
 ## 0.6.0
 
