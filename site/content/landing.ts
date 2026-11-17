@@ -147,7 +147,7 @@ const CARDS: Card[] = [
 
 const landing: LandingContent = {
   hero: {
-    title: { rest: 'The same Claude Code for up to 38% less' },
+    title: { before: 'The same Claude Code for up to', chip: '38%', rest: 'less' },
     lede: 'Replays your own past sessions to show what each change would have saved, then changes only what you pick.',
     under: 'A real session, recorded live. Your saving depends on how you work: [see the proof](/docs/proof).',
     film: {
