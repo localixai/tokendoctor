@@ -7,7 +7,7 @@ const docs: DocsConfig = {
   index: {
     title: 'tokendoctor docs',
     description:
-      'How to install tokendoctor in Claude Code, see what your use overpays, fix it with the audit and the settings, slide the window instead of summarizing, and undo any change.',
+      'Install tokendoctor in Claude Code, see what your use overpays, fix it with the audit and the settings, and undo any change.',
   },
   groups: [
     {
