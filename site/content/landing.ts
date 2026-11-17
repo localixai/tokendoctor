@@ -149,6 +149,10 @@ const landing: LandingContent = {
   hero: {
     title: { before: 'The same Claude Code for up to', chip: '38%', rest: 'less' },
     lede: 'Replays your own past sessions to show what each change would have saved, then changes only what you pick.',
+    links: [
+      { label: 'GitHub', href: GITHUB },
+      { label: 'How to use', href: `${DOCS}/getting-started` },
+    ],
     under: 'A real session, recorded live. Your saving depends on how you work: [see the proof](/docs/proof).',
     film: {
       src: '/demo.cast',
