@@ -90,6 +90,9 @@ export type LandingContent = {
      *  `rest`. Every part but `rest` is optional: a headline with no chip is `rest` alone. */
     title: { before?: string; chip?: string; after?: string; rest: string };
     lede: string;
+    /** Links shown as actions in place of the install command, the first one filled; the
+     *  install steps then live in the closing alone. */
+    links?: NavLink[];
     /** The small line under the install command; it takes [links](/docs). */
     under: string;
     /** A recorded terminal session (asciinema v3) under public/, and what it shows, in words. */
