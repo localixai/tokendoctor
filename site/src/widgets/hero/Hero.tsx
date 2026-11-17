@@ -11,6 +11,7 @@ export function Hero() {
     <section className="hero wrap">
       <div className="hero-copy">
         <h1>
+          {title.before && <>{title.before} </>}
           {title.chip && (
             <>
               <span className="hero-lead">

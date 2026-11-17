@@ -86,7 +86,9 @@ export type LandingContent = {
   hero: {
     /** The headline: an optional first word on a chip, what follows it unbroken (a comma), and
      *  the rest. */
-    title: { chip?: string; after?: string; rest: string };
+    /** `before`, then `chip` on the white chip with `after` (a comma) kept beside it, then
+     *  `rest`. Every part but `rest` is optional: a headline with no chip is `rest` alone. */
+    title: { before?: string; chip?: string; after?: string; rest: string };
     lede: string;
     /** The small line under the install command; it takes [links](/docs). */
     under: string;
