@@ -20,7 +20,7 @@ Whether a rule helps depends on your plan and workload. Findings explain the tra
 
 ## How costs are counted
 
-Costs are dollars at each model's [Claude API list price](https://platform.claude.com/docs/en/about-claude/pricing) (`lib/prices.mjs`: cache reads at 0.05x input on Opus 5.5 and Sonnet 5.5, 0.025x on Fable 5.1, Haiku 5.5 priced by prompt length, fast mode, US-only inference, web search). On a Pro or Max plan that is what the same work would cost on the API: Anthropic does not publish how plan limits weigh each kind of token.
+Costs are dollars at each model's [Claude API list price](https://platform.claude.com/docs/en/about-claude/pricing) (`lib/prices.mjs`: cache reads at 0.05x input on Opus 5.5 and Sonnet 5.5, 0.025x on Fable 5.1 and 5.2, Haiku 5.5 priced by prompt length, fast mode, US-only inference, web search). On a Pro or Max plan that is what the same work would cost on the API: Anthropic does not publish how plan limits weigh each kind of token.
 
 Claude Code bills some requests it does not write into transcripts: a summary compaction's own request, titles, the small model that reads a page for WebFetch. Their cost is Claude Code's own session total (its `cost-state` lines) minus the responses in the transcripts, where that total holds; else the summaries are estimated from the context they read. Against the cost Claude Code reported on [bench](https://github.com/localixai/tokendoctor/blob/main/bench/README.md)'s 78 runs: equal to the cent on 77, 7.7% over on one.
 
