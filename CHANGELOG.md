@@ -13,6 +13,12 @@
 - **The description says what it does first:** "Replays your own past sessions to show what each
   change would have saved, then changes only what you pick", the same in the plugin's manifests, the
   marketplace, the site and the README.
+- **A forked or resumed session counts once.** Its transcript starts with a copy of the one it came
+  from, the same lines with the same uuids, and its subagents' transcripts are copied too. `sessions`,
+  `replay` and the dashboard read every file in full, so a session forked twice counted three times (on
+  one machine the total was 49% over). Transcripts are now read oldest first and a line an
+  earlier file of the same project gave is left out, so each copy counts only what it added; Claude
+  Code's own session total, which a copy carries over, is left aside for it.
 
 ## 0.6.0
 
