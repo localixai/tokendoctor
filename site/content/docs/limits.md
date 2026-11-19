@@ -24,7 +24,7 @@ Costs are dollars at each model's [Claude API list price](https://platform.claud
 
 Claude Code bills some requests it does not write into transcripts: a summary compaction's own request, titles, the small model that reads a page for WebFetch. Their cost is Claude Code's own session total (its `cost-state` lines) minus the responses in the transcripts, where that total holds; else the summaries are estimated from the context they read. Against the cost Claude Code reported on [bench](https://github.com/localixai/tokendoctor/blob/main/bench/README.md)'s 78 runs: equal to the cent on 77, 7.7% over on one.
 
-A forked or resumed session's transcript starts with a copy of the one it came from: each line counts once, in the oldest file that has it, so a copy counts only what it added.
+A forked or resumed session's transcript starts with a copy of the one it came from: each line counts once, in the oldest file that has it, so a copy counts only what it added. A period (`days`) counts what happened in it: a session begun before it brings only its part.
 
 ## What it cannot see
 
