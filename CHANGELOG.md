@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Fable 5.2 and Mythos 5.2 have prices.** Responses from `claude-fable-5-2` counted as unpriced, so
+  every report and the dashboard left them out: on one machine, 3,749 responses in nine days. $8 input
+  and $40 output per million tokens, cache reads at 0.025x, and for Fable 5.2 fast mode at $16 and $80;
+  the rest of the price table, read again on 2026-11-19, is unchanged.
 - **The repository moved to github.com/localixai/tokendoctor**, with the rest of Localix Lab's
   tools. Install with `claude plugin marketplace add localixai/tokendoctor`; the plugin is still
   `tokendoctor@tokendoctor`. The old address, and a marketplace already added from it, redirect.

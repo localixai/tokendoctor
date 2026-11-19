@@ -25,6 +25,16 @@ test('cost is dollars at the model list price: cache reads, writes by TTL and ou
   assert.equal(cost({ input_tokens: 10 }, 'some-other-model'), 0)
 })
 
+test('Fable 5.2 and Mythos 5.2 are priced: $8 input, $40 output, cache read 0.025x; Fable 5.2 fast $16 and $80', () => {
+  for (const model of ['claude-fable-5-2', 'claude-mythos-5-2']) {
+    near(cost({ input_tokens: 10, cache_read_input_tokens: 1000, output_tokens: 2 }, model), (10 * 8 + 1000 * 0.2 + 2 * 40) / 1e6)
+    near(cost({ cache_creation_input_tokens: 100, cache_creation: { ephemeral_1h_input_tokens: 100 } }, model), (100 * 16) / 1e6)
+    near(cost({ cache_creation_input_tokens: 100 }, model), (100 * 10) / 1e6)
+    near(cost({ input_tokens: 10, inference_geo: 'us' }, model), (10 * 8 * 1.1) / 1e6)
+  }
+  near(cost({ input_tokens: 10, output_tokens: 2, speed: 'fast' }, 'claude-fable-5-2'), (10 * 16 + 2 * 80) / 1e6)
+})
+
 test('a summary compaction adds an estimate of its own request, which the transcript leaves out', () => {
   const rows = [
     turn(0, u(300_000, 1000)),
