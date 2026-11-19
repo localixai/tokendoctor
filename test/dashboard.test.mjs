@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
@@ -84,5 +84,31 @@ test('the CLI writes all of a large --json to a pipe and refuses a bad --days', 
     const r = spawnSync('node', [bin, '--days', bad, '--json'], { env: { ...process.env, CLAUDE_CONFIG_DIR: dir }, encoding: 'utf8' })
     assert.equal(r.status, 2, `--days ${bad}`)
   }
+  rmSync(dir, { recursive: true })
+})
+
+test("collect counts a forked transcript's copied responses once, and leaves aside the copied own total", () => {
+  const dir = mkdtempSync(join(tmpdir(), 'td-dash-fork-'))
+  const project = join(dir, 'projects', '-x-proj')
+  const start = Date.UTC(2026, 9, 1, 10, 0)
+  const resp = (id, minute, read = 1000) => JSON.stringify({ type: 'assistant', uuid: `u-${id}`, timestamp: new Date(start + minute * 60e3).toISOString(), message: { id, model: 'claude-opus-5-5', usage: { input_tokens: 10, cache_read_input_tokens: read, output_tokens: 20 } } })
+  // Two responses of 10M cached tokens, $2 apiece; Claude Code's own total is 50 cents over them.
+  const state = JSON.stringify({ type: 'cost-state', totalCostUSD: 2 * (10 * 4e-6 + 10_000_000 * 0.2e-6 + 20 * 20e-6) + 0.5, startTime: start, hasUnknownModelCost: false })
+  const shared = [resp('m1', 0, 10_000_000), resp('m2', 1, 10_000_000), state]
+  // The original is the older file; its name sorts after the fork's, so age decides, not the name.
+  for (const [name, own] of [['b-original', []], ['a-fork', [resp('m3', 2)]]]) {
+    mkdirSync(join(project, name, 'subagents'), { recursive: true })
+    writeFileSync(join(project, `${name}.jsonl`), [...shared, ...own].join('\n'))
+    writeFileSync(join(project, name, 'subagents', 'a.meta.json'), JSON.stringify({ agentType: 'Explore' }))
+    writeFileSync(join(project, name, 'subagents', 'a.jsonl'), resp('a1', 1))
+    if (name === 'b-original') utimesSync(join(project, `${name}.jsonl`), start / 1000, start / 1000)
+  }
+  const d = collect(dir)
+  const requests = (thread) => d.rows.filter((r) => r[4] === thread).reduce((n, r) => n + r[6].requests, 0)
+  assert.equal(requests('main'), 3, 'm1 and m2 once, and the fork\'s own m3')
+  assert.equal(requests('agent:Explore'), 1)
+  assert.equal(d.runs, 1)
+  assert.equal(d.ownTotals, 1, "the fork's copy of Claude Code's total is not its own")
+  assert.deepEqual(d.sessions.map((s) => s.requests).sort(), [1, 2])
   rmSync(dir, { recursive: true })
 })
