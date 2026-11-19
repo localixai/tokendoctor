@@ -19,6 +19,12 @@
   one machine the total was 49% over). Transcripts are now read oldest first and a line an
   earlier file of the same project gave is left out, so each copy counts only what it added; Claude
   Code's own session total, which a copy carries over, is left aside for it.
+- **`--days` counts what happened in those days.** A transcript was taken whole when its file had
+  changed in the period, so a session begun months before brought all of its cost, and a change of
+  every file's date (an update, a restore) made "the last 60 days" every transcript on disk. `sessions`
+  and `replay` now count the responses, compactions and tool calls of the period, as the dashboard
+  did; the replay starts a session at the context it had when the period began, and `--by day` still
+  counts its first day from midnight.
 
 ## 0.6.0
 

@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { historyPath, readHistory, recordHistory, trend } from '../lib/history.mjs'
-import { analyzeSession, daily } from '../lib/sessions.mjs'
+import { analyzeSession, daily, localDay } from '../lib/sessions.mjs'
 
 let dir
 beforeEach(() => {
@@ -81,4 +81,12 @@ test('the hook script prints nothing and the hook is async on startup only', () 
   const hook = JSON.parse(readFileSync(join(root, 'hooks', 'hooks.json'), 'utf8')).hooks.SessionStart[0]
   assert.equal(hook.matcher, 'startup')
   assert.equal(hook.hooks[0].async, true)
+})
+
+test("a trend's first day is whole: what happened before the hour it starts counts too", () => {
+  // Midnight five days ago is before now less five days, but on the trend's first day.
+  session('s', [turn(at(5, 0)), turn(at(1))])
+  const rows = trend(dir, 5)
+  assert.equal(rows[0]?.date, localDay(at(5, 0)))
+  assert.equal(rows[0].turns, 1)
 })
