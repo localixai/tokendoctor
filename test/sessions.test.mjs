@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { analyzeSession, cost, summarize } from '../lib/sessions.mjs'
+import { analyzeSession, cost, loadSessions, loadUsage, summarize } from '../lib/sessions.mjs'
 
 let n = 0
 const turn = (minute, usage, { model = 'claude-opus-5-5', id } = {}) => ({
@@ -121,8 +121,10 @@ test('the CLI reads transcripts under the config folder and prints no message te
     const proj = join(dir, 'projects', '-p')
     mkdirSync(join(proj, 's1', 'subagents'), { recursive: true })
     const secret = { type: 'user', message: { content: 'private words' } }
-    writeFileSync(join(proj, 's1.jsonl'), [secret, turn(0, u(1000, 100))].map((r) => JSON.stringify(r)).join('\n'))
-    writeFileSync(join(proj, 's1', 'subagents', 'agent-1.jsonl'), JSON.stringify(turn(1, u(1000, 100))))
+    // Today's, as the CLI counts the last 30 days by when each response was made.
+    const today = (r) => ({ ...r, timestamp: new Date().toISOString() })
+    writeFileSync(join(proj, 's1.jsonl'), [secret, today(turn(0, u(1000, 100)))].map((r) => JSON.stringify(r)).join('\n'))
+    writeFileSync(join(proj, 's1', 'subagents', 'agent-1.jsonl'), JSON.stringify(today(turn(1, u(1000, 100)))))
     writeFileSync(join(proj, 's1', 'subagents', 'agent-1.meta.json'), JSON.stringify({ agentType: 'Explore' }))
     const bin = join(dirname(fileURLToPath(import.meta.url)), '..', 'bin', 'tokendoctor-sessions')
     const r = spawnSync(process.execPath, [bin, '--json'], { encoding: 'utf8', env: { PATH: process.env.PATH, HOME: dir, CLAUDE_CONFIG_DIR: dir } })
@@ -180,4 +182,77 @@ test('files read before a compaction and read again right after are counted, by 
   const t = summarize([s, session(true), session(true)])
   const f = t.findings.find((x) => x.id === 'rereads-after-compaction')
   assert.match(f.title, /2\.0 files again/)
+})
+
+// A forked or resumed session's transcript starts with a copy of the one it came from: the same
+// lines, uuids and all, Claude Code's cost-state line among them, and its subagents' transcripts.
+function forked() {
+  const dir = mkdtempSync(join(tmpdir(), 'tokendoctor-fork-'))
+  const proj = join(dir, 'projects', '-p')
+  const write = (path, rows) => {
+    mkdirSync(dirname(path), { recursive: true })
+    writeFileSync(path, rows.map((r) => JSON.stringify(r)).join('\n'))
+  }
+  const start = Date.UTC(2026, 9, 1, 0, 0)
+  const line = (uuid, minute, usage, id) => ({ ...turn(minute, usage, { id }), uuid })
+  const shared = [
+    { type: 'user', uuid: 'u0', timestamp: new Date(start).toISOString(), message: { content: 'hello' } },
+    line('u1', 1, u(10_000_000, 0), 'm1'),
+    line('u2', 2, u(10_000_000, 0), 'm2'),
+    { type: 'cost-state', totalCostUSD: cost(u(10_000_000, 0), 'claude-opus-5-5') * 2 + 0.5, startTime: start, hasUnknownModelCost: false },
+  ]
+  const agent = [line('x1', 1, u(1000, 100), 'a1')]
+  // The original is the older file; its name sorts after the fork's, so age decides, not the name.
+  for (const [name, own] of [['b-original', line('u3', 3, u(1000, 0), 'm3')], ['a-fork', line('u4', 4, u(2000, 0), 'm4')]]) {
+    write(join(proj, `${name}.jsonl`), [...shared, own])
+    write(join(proj, name, 'subagents', 'agent-x.jsonl'), agent)
+    writeFileSync(join(proj, name, 'subagents', 'agent-x.meta.json'), JSON.stringify({ agentType: 'Explore' }))
+    if (name === 'b-original') utimesSync(join(proj, `${name}.jsonl`), start / 1000, start / 1000)
+  }
+  return dir
+}
+
+test("a forked transcript counts only what it added; the file it came from keeps the shared lines", () => {
+  const dir = forked()
+  try {
+    const sessions = loadSessions(dir)
+    assert.equal(sessions.length, 2)
+    const original = sessions.find((s) => s.turns === 3)
+    const fork = sessions.find((s) => s.turns === 1)
+    assert.ok(original && fork, `turns ${sessions.map((s) => s.turns)}`)
+    assert.equal(original.agents.Explore.runs, 1)
+    assert.deepEqual(fork.agents, {}, 'the copied subagent transcript adds no run')
+    // Claude Code's own total is the original's; the copy's is not its own.
+    assert.equal(original.hiddenFrom, 'claude code')
+    assert.equal(fork.hiddenFrom, 'estimate')
+    assert.equal(fork.hiddenCost, 0)
+    near(fork.cost, cost(u(2000, 0), 'claude-opus-5-5'))
+    const usage = loadUsage(dir).map((s) => [s.usage.length, s.agents > 0])
+    assert.deepEqual(usage.sort(), [[1, false], [3, true]])
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('a period counts only what happened in it, also of a session that started before it', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'tokendoctor-period-'))
+  try {
+    const proj = join(dir, 'projects', '-p')
+    mkdirSync(join(proj, 's', 'subagents'), { recursive: true })
+    const at = (days, id) => ({ type: 'assistant', uuid: id, timestamp: new Date(Date.now() - days * 864e5).toISOString(), message: { id, model: 'claude-opus-5-5', usage: u(1000, 0), content: [] } })
+    writeFileSync(join(proj, 's.jsonl'), [at(40, 'old'), at(1, 'new')].map((r) => JSON.stringify(r)).join('\n'))
+    writeFileSync(join(proj, 's', 'subagents', 'agent-old.jsonl'), JSON.stringify(at(40, 'agent-old')))
+    writeFileSync(join(proj, 's', 'subagents', 'agent-new.jsonl'), JSON.stringify(at(1, 'agent-new')))
+    const one = cost(u(1000, 0), 'claude-opus-5-5')
+    const [s] = loadSessions(dir, { days: 30 })
+    assert.equal(s.turns, 1)
+    assert.equal(s.runs.length, 1, 'the subagent run before the period is left out')
+    near(s.cost, 2 * one)
+    const [r] = loadUsage(dir, { days: 30 })
+    assert.equal(r.usage.length, 1)
+    near(r.agents, one)
+    assert.equal(loadSessions(dir)[0].turns, 2, 'without a period, all of it')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
 })
