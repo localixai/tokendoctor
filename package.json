@@ -1,6 +1,6 @@
 {
   "name": "tokendoctor",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "description": "The same Claude Code for up to 38% less. Replays your own past sessions to show what each change would have saved, then changes only what you pick.",
   "type": "module",

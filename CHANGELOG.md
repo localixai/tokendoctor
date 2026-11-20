@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.1
 
 - **Fable 5.2 and Mythos 5.2 have prices.** Responses from `claude-fable-5-2` counted as unpriced, so
   every report and the dashboard left them out: on one machine, 3,749 responses in nine days. $8 input
