@@ -12,7 +12,7 @@ const breakdown = (fields: Pick<SessionContextBreakdown, 'categories' | 'model' 
   gridRows: [], memoryFiles: [], mcpTools: [], agents: [], apiUsage: null, ...fields,
 })
 
-test('the five tools are registered at session start, behind ToolSearch', async ($, on) => {
+test('the three tools are registered at session start, behind ToolSearch', async ($, on) => {
   const names: string[] = []
   on('tool.register', (_, e) => {
     names.push(e.name)
@@ -21,32 +21,20 @@ test('the five tools are registered at session start, behind ToolSearch', async 
   })
   on('session.start', (_, e) => ({ cwd: e.cwd }))
   await $.session.start(start)
-  expect(names).toEqual(['metrics', 'settings', 'config_list', 'config_set', 'set_setting'])
+  expect(names).toEqual(['metrics', 'settings', 'set_setting'])
 })
 
-test('its own tools skip the permission prompt, other tools are left alone', async ($, on) => {
+test('the person\'s permission rules decide on its tools, the mod does not answer for them', async ($, on) => {
   on('tool.check', () => ({ decision: 'deny', reason: 'engine' }))
-  expect((await $.tool.check({ tool: 'mcp__tokendoctor__metrics', input: {} })).decision).toBe('allow')
-  expect((await $.tool.check({ tool: 'mcp__tokendoctor__set_setting', input: {} })).decision).toBe('allow')
-  expect((await $.tool.check({ tool: 'Bash', input: { command: 'ls' } })).decision).toBe('deny')
+  expect((await $.tool.check({ tool: 'mcp__tokendoctor__metrics', input: {} })).decision).toBe('deny')
+  expect((await $.tool.check({ tool: 'mcp__tokendoctor__set_setting', input: {} })).decision).toBe('deny')
 })
 
-test('config_list reports the /config rows and config_set relays a refusal', async ($, on) => {
-  on('config.list', () => ({ value: [{ key: 'verbose', label: 'Verbose', kind: 'boolean', value: false, provider: { plugin: 'engine', tier: 'core' }, isLocked: false }] }))
-  let sets = 0
-  on('config.set', (_, e) => (sets++, { value: e.value }))
-  let answer = 'Apply'
-  on('tool.call', { tool: 'AskUserQuestion' }, (_, e) => ({ result: { questions: e.questions, answers: { [e.questions[0]!.question]: answer } } }))
-  const list = await $.tool.call({ tool: 'mcp__tokendoctor__config_list' })
-  expect(String(list.result)).toContain('"verbose"')
-  const ok = await $.tool.call({ tool: 'mcp__tokendoctor__config_set', key: 'verbose', value: true })
-  expect(String(ok.result)).toContain('verbose is now true')
-  answer = 'Cancel'
-  const no = await $.tool.call({ tool: 'mcp__tokendoctor__config_set', key: 'verbose', value: false })
-  expect(String(no.result)).toContain('did not approve')
-  const missing = await $.tool.call({ tool: 'mcp__tokendoctor__config_set', key: 'nope', value: 1 })
-  expect(String(missing.result)).toContain('has no row')
-  expect(sets).toBe(1)
+test('a tool whose hook fails answers with a reason', async ($, on) => {
+  on('process.run', () => ({ value: ran('[null]') }))
+  on('settings.read', () => ({ value: {} }))
+  const r = await $.tool.call({ tool: 'mcp__tokendoctor__settings' })
+  expect(String(r.result)).toContain('the tool failed')
 })
 
 test('set_setting shows the dry run, writes only on Apply, and never without a person', async ($, on) => {

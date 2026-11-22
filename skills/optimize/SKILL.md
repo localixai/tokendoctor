@@ -2,7 +2,7 @@
 name: optimize
 description: Look at token metrics, propose setting changes that cut waste, and apply the ones the person approves.
 disable-model-invocation: true
-allowed-tools: mcp__tokendoctor__metrics, mcp__tokendoctor__settings, mcp__tokendoctor__config_list, Bash(tokendoctor-sessions *), Bash(tokendoctor-audit *), WebFetch(domain:code.claude.com)
+allowed-tools: mcp__tokendoctor__metrics, mcp__tokendoctor__settings, Bash(tokendoctor-sessions *), Bash(tokendoctor-audit *), WebFetch(domain:code.claude.com)
 argument-hint: [focus]
 ---
 
@@ -15,13 +15,12 @@ every page is Markdown at `https://code.claude.com/docs/en/<page>.md` (index:
 prefer that to memory or a mirror.
 
 The tokendoctor tools wait behind ToolSearch: load `mcp__tokendoctor__metrics`,
-`mcp__tokendoctor__settings`, `mcp__tokendoctor__config_list`, `mcp__tokendoctor__config_set` and
-`mcp__tokendoctor__set_setting` in one ToolSearch call first.
+`mcp__tokendoctor__settings` and `mcp__tokendoctor__set_setting` in one ToolSearch call first.
 
 1. **Measure.** Call `metrics` (session context, rate limits, cost, the largest context categories,
    daily totals, audit findings). For the longer view run `tokendoctor-sessions --json --days 30`.
 2. **See what can change.** Call `settings` (every setting tokendoctor may change, set or not, with
-   its current value and whether a change applies live) and `config_list` (the /config rows).
+   its current value and whether a change applies live).
 3. **Propose.** Pick at most five changes, largest saving first. For each give: the setting, the
    current and new value, the evidence from step 1 in one sentence, the trade-off, and whether it
    applies now or at the next session. Costs are dollars at API list prices, which on a plan are not
@@ -47,8 +46,8 @@ The tokendoctor tools wait behind ToolSearch: load `mcp__tokendoctor__metrics`,
    `tokendoctor.slideTo` at its default (25) unless the person asks: a higher one slides more often,
    and every slide re-sends the context once.
 4. **Ask.** Use AskUserQuestion (multiSelect) to let the person pick which changes to apply.
-5. **Apply** each picked change with `config_set` (a /config row, live) or `set_setting` (a settings
-   file, with a backup). Each call asks the person again; a refusal is final for that change.
+5. **Apply** each picked change with `set_setting` (a settings file, with a backup; the `settings`
+   list says which apply live). Each call asks the person again; a refusal is final for that change.
 6. **Report** what changed, what needs a new session (`model`, `effortLevel` and every `env.*`
    value), and suggest running `tokendoctor-sessions --by day` in a few days to compare. Say that
    `/tokendoctor` shows these settings and `/tokendoctor <name> <value>` changes one with no model call.

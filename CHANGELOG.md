@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- **Your permission rules decide on tokendoctor's tools.** The hooks module no longer answers
+  `allow` for its own tools: the optimize skill allows the two reading ones, and a change still
+  runs only after you pick Apply in tokendoctor's dialog.
+- **One way to change a setting:** `set_setting`, which writes a settings file with a backup and
+  says which settings apply live. The `config_list` and `config_set` tools are gone.
+- **A failed hook answers instead of vanishing.** A tool whose hook fails says so, and a slide that
+  fails leaves Claude Code's own summary to run.
+- **The README says what the hooks module does:** each hook, the programs it runs and the one
+  network call.
+
 ## 0.6.1
 
 - **Fable 5.2 and Mythos 5.2 have prices.** Responses from `claude-fable-5-2` counted as unpriced, so

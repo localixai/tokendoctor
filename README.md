@@ -110,6 +110,31 @@ show it, and you should leave your window alone. Every run, the losing ones too,
 Nothing leaves your machine: the only network call is to two public pages of Claude Code's docs,
 once a day. It never switches your models on its own.
 
+## What the plugin runs
+
+- **Programs.** The hooks module and the skills run tokendoctor's own Node scripts in the plugin's
+  `bin/` folder, and nothing else: `tokendoctor-sessions` and `tokendoctor-replay` (read your
+  transcripts), `tokendoctor-audit` (checks your settings, and once a day reads two public pages of
+  code.claude.com to know Claude Code's current settings), `tokendoctor-set`, `tokendoctor-apply`
+  and `tokendoctor-undo` (write or restore one setting, each with a backup), and
+  `tokendoctor-dashboard` (a local page).
+- **What it sends.** Nothing. The audit's daily read of Claude Code's docs is the only request, and
+  it sends no data of yours.
+- **What it changes.** Only the settings in `/tokendoctor all`, in the settings file you choose,
+  and only after you pick Apply in a dialog that shows the change. `/tokendoctor undo` puts any of
+  them back. It never changes hooks or permissions.
+- **The hooks.**
+  - At session start: registers the `/tokendoctor` command and three tools (`metrics`, `settings`,
+    `set_setting`), and runs the audit to warn once if the slide is on but cannot run.
+  - `/tokendoctor`: answers the command itself, with no model call.
+  - Typeahead after `/tokendoctor `: offers setting names and values.
+  - Compaction: only with the slide on, and only for a compaction Claude Code starts on its own.
+    It drops old tool output instead of summarizing; a `/compact` you type still summarizes, and
+    if the slide cannot free enough, or fails, Claude Code summarizes as usual.
+  - The first tool call after a slide: reads the context size to correct the next slide's estimate.
+    It changes nothing about the call.
+  - The three tools answer the optimize skill. `set_setting` asks you before it writes anything.
+
 ## Documentation
 
 **[tokendoctor.localix.ai/docs](https://tokendoctor.localix.ai/docs)** has the rest: the

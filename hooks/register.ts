@@ -2,18 +2,19 @@ import type { EngineInterface, Register } from 'claude-code'
 import { calibrate, chars, dedupe, IMAGE_TOKENS, imagesIn, slide } from './window'
 import * as menu from '../lib/console.mjs'
 
-// Tools for /tokendoctor:optimize. Reading tools run without a prompt. A change runs only after the
-// person picks "Apply" in a dialog that shows it: a permission `ask` can be settled by the mode
-// (bypass, a -p run) without a person, so the dialog is the mod's own, and with no one to ask
-// ($.ui.ask rejects in -p) nothing changes. The tools wait behind ToolSearch, so they add nothing
-// to context until the optimize skill loads them.
+// Tools for /tokendoctor:optimize. The person's own permission rules decide whether a call asks
+// (the optimize skill allows the two reading tools). A change runs only after the person picks
+// "Apply" in a dialog that shows it: a permission `ask` can be settled by the mode (bypass, a -p
+// run) without a person, so the dialog is the mod's own, and with no one to ask ($.ui.ask rejects
+// in -p) nothing changes. The tools wait behind ToolSearch, so they add nothing to context until
+// the optimize skill loads them.
 const PLUGIN = 'tokendoctor'
 const USER_ID = 'tokendoctor@tokendoctor'
 const tool = <N extends string>(name: N) => `mcp__${PLUGIN}__${name}` as const
-const READS: string[] = [tool('metrics'), tool('settings'), tool('config_list')]
-const WRITES: string[] = [tool('config_set'), tool('set_setting')]
 
 const text = (value: unknown) => ({ result: typeof value === 'string' ? value : JSON.stringify(value, null, 1) })
+// What a tool answers when its work throws: the call ends with a reason instead of no answer.
+const failed = () => text('tokendoctor: the tool failed before it finished. Run /tokendoctor:audit to check the install.')
 
 export const register: Register = (on, options) => {
   // The options are the ones /tokendoctor writes (pluginConfigs of tokendoctor@tokendoctor). The copy
@@ -39,7 +40,7 @@ export const register: Register = (on, options) => {
     const real = (await $.session.usage()).context.tokens
     if (real) extra = calibrate(extra, real - estimate)
     return next(e)
-  })
+  }).catch(($, e, next) => next(e))
 
   on('session.start', async ($, e, next) => {
     const result = await next(e)
@@ -63,15 +64,6 @@ export const register: Register = (on, options) => {
         'whether a change applies live or at the next session, and what it does. Read-only.',
     })
     await $.tool.register({
-      name: 'config_list',
-      description: 'The rows of the /config menu with their current values, kinds and options. Read-only.',
-    })
-    await $.tool.register({
-      name: 'config_set',
-      description: 'Change one /config row (key from config_list), live, as if the person did it in /config. Asks the person.',
-      inputSchema: { type: 'object', properties: { key: { type: 'string' }, value: {} }, required: ['key', 'value'] },
-    })
-    await $.tool.register({
       name: 'set_setting',
       description:
         'Write one setting from the `settings` list to a settings file, with a backup. `value` omitted unsets it. ' +
@@ -87,14 +79,7 @@ export const register: Register = (on, options) => {
       description: 'Show and change token settings by name (no model call)',
       argumentHint: '[window|slide|cache|effort|model|subagents|all|fix|undo] [value|reset]',
     })
-    void audit($)
-      .then(found => {
-        // Where Claude Code's guard sends compaction past the mods a person installs, the slide would
-        // be on and never run: say so once, with the way out (lib/guard.mjs).
-        const blocked = slideOn && found.find(f => f.id === 'slide-blocked-by-guard')
-        if (blocked) $.ui.toast('tokendoctor: the slide cannot run under this login, Claude Code will summarize. /tokendoctor slide says why.', { timeoutMs: 12_000 })
-      })
-      .catch(() => {})
+    void warnIfBlocked($, slideOn).catch(() => {})
     return result
   })
 
@@ -186,82 +171,74 @@ export const register: Register = (on, options) => {
     afterSlide = s.messages.length
     measure = now - s.freed - dropped
     return { messages: s.messages, tokensBefore: now, tokensAfter: after }
-  })
-
-  on('tool.check', async ($, e, next) => {
-    if (READS.includes(e.tool)) return { decision: 'allow' }
-    if (WRITES.includes(e.tool)) return { decision: 'allow' }
-    return next(e)
-  })
+    // A slide that fails leaves Claude Code's own summary to run.
+  }).catch(($, e, next) => next(e))
 
   on('tool.call', { tool: tool('metrics') }, async ($, e) => {
-    const days = typeof e.days === 'number' ? e.days : 14
-    const usage = await $.session.usage({ breakdown: 'summary' })
-    const b = usage.context.breakdown
-    const session = {
-      tokens: usage.context.tokens,
-      window: usage.context.window,
-      compactAt: b?.autoCompactThreshold,
-      compactWindow: b?.rawMaxTokens,
-      // tokendoctor.slide: where Claude Code compacts, old tool outputs are elided instead of summarized.
-      slide: slideOn ? { to: `${slideTo}% of where Claude Code compacts` } : false,
-      autoCompact: b?.isAutoCompactEnabled,
-      model: b?.model,
-      biggest: b?.categories
-        .filter(c => c.kind === 'used')
-        .sort((x, y) => y.tokens - x.tokens)
-        .slice(0, 6)
-        .map(c => ({ name: c.name, tokens: c.tokens })),
-      rateLimits: usage.rateLimits,
-      costUsd: usage.cost?.usd,
-    }
-    const trend = await bin($, 'tokendoctor-sessions', ['--by', 'day', '--days', String(days), '--json'])
-    const audit = await bin($, 'tokendoctor-audit', ['--json'])
-    let findings: unknown = audit
     try {
-      findings = JSON.parse(audit).findings.map((f: { id: string; severity: string; title: string; fixes?: unknown }) => ({
-        id: f.id,
-        severity: f.severity,
-        title: f.title,
-        hasFix: Boolean(f.fixes),
-      }))
-    } catch {}
-    return text({ session, trend: safeJson(trend), findings })
+      const days = typeof e.days === 'number' ? e.days : 14
+      const usage = await $.session.usage({ breakdown: 'summary' })
+      const b = usage.context.breakdown
+      const session = {
+        tokens: usage.context.tokens,
+        window: usage.context.window,
+        compactAt: b?.autoCompactThreshold,
+        compactWindow: b?.rawMaxTokens,
+        // tokendoctor.slide: where Claude Code compacts, old tool outputs are elided instead of summarized.
+        slide: slideOn ? { to: `${slideTo}% of where Claude Code compacts` } : false,
+        autoCompact: b?.isAutoCompactEnabled,
+        model: b?.model,
+        biggest: b?.categories
+          .filter(c => c.kind === 'used')
+          .sort((x, y) => y.tokens - x.tokens)
+          .slice(0, 6)
+          .map(c => ({ name: c.name, tokens: c.tokens })),
+        rateLimits: usage.rateLimits,
+        costUsd: usage.cost?.usd,
+      }
+      const trend = await bin($, 'tokendoctor-sessions', ['--by', 'day', '--days', String(days), '--json'])
+      const report = await bin($, 'tokendoctor-audit', ['--json'])
+      let findings: unknown = report
+      try {
+        findings = JSON.parse(report).findings.map((f: { id: string; severity: string; title: string; fixes?: unknown }) => ({
+          id: f.id,
+          severity: f.severity,
+          title: f.title,
+          hasFix: Boolean(f.fixes),
+        }))
+      } catch {}
+      return text({ session, trend: safeJson(trend), findings })
+    } catch {
+      return failed()
+    }
   })
 
   on('tool.call', { tool: tool('settings') }, async ($) => {
-    const out = await bin($, 'tokendoctor-set', ['--list', '--json'])
-    const rows = safeJson(out)
-    if (!Array.isArray(rows)) return text(out)
-    const merged = (await $.settings.read()) as Record<string, unknown>
-    // `path` is where the value lives (env.X under env, a plugin option under pluginConfigs).
-    const at = (path: string) =>
-      path.split('.').reduce<unknown>((node, p) => (node && typeof node === 'object' ? (node as Record<string, unknown>)[p] : undefined), merged)
-    return text(rows.map((r: { key: string; path?: string }) => ({ ...r, current: at(r.path ?? r.key) ?? null })))
-  })
-
-  on('tool.call', { tool: tool('config_list') }, async ($) => {
-    const rows = await $.config.list()
-    return text(rows.map(r => ({ key: r.key, label: r.label, kind: r.kind, value: r.value, options: r.options })))
-  })
-
-  on('tool.call', { tool: tool('config_set') }, async ($, e) => {
-    const { key, value } = e as unknown as { key: string; value: never }
-    const row = (await $.config.list()).find(r => r.key === key)
-    if (!row) return text(`Not changed: /config has no row "${key}".`)
-    const change = `/config ${row.label}: ${JSON.stringify(row.value)} → ${JSON.stringify(value)} (applies now)`
-    if (!(await confirm($, change))) return text(`Not changed: the person did not approve (${change}).`)
-    const r = await $.config.set({ key, value })
-    return text(r.deny ? `Not changed: ${r.deny}` : `${key} is now ${JSON.stringify(r.value)} (live).`)
+    try {
+      const out = await bin($, 'tokendoctor-set', ['--list', '--json'])
+      const rows = safeJson(out)
+      if (!Array.isArray(rows)) return text(out)
+      const merged = (await $.settings.read()) as Record<string, unknown>
+      // `path` is where the value lives (env.X under env, a plugin option under pluginConfigs).
+      const at = (path: string) =>
+        path.split('.').reduce<unknown>((node, p) => (node && typeof node === 'object' ? (node as Record<string, unknown>)[p] : undefined), merged)
+      return text(rows.map((r: { key: string; path?: string }) => ({ ...r, current: at(r.path ?? r.key) ?? null })))
+    } catch {
+      return failed()
+    }
   })
 
   on('tool.call', { tool: tool('set_setting') }, async ($, e) => {
-    const { key, value, scope } = e as unknown as { key: string; value?: unknown; scope?: string }
-    const args = [key, ...(value === undefined ? ['--unset'] : [JSON.stringify(value)]), '--scope', scope ?? 'user']
-    const plan = await bin($, 'tokendoctor-set', args)
-    if (!plan.startsWith('Would change')) return text(plan)
-    if (!(await confirm($, plan.replace(/\n+Dry run.*$/s, '')))) return text(`Not changed: the person did not approve.\n${plan}`)
-    return text(await bin($, 'tokendoctor-set', [...args, '--write']))
+    try {
+      const { key, value, scope } = e as unknown as { key: string; value?: unknown; scope?: string }
+      const args = [key, ...(value === undefined ? ['--unset'] : [JSON.stringify(value)]), '--scope', scope ?? 'user']
+      const plan = await bin($, 'tokendoctor-set', args)
+      if (!plan.startsWith('Would change')) return text(plan)
+      if (!(await confirm($, plan.replace(/\n+Dry run.*$/s, '')))) return text(`Not changed: the person did not approve.\n${plan}`)
+      return text(await bin($, 'tokendoctor-set', [...args, '--write']))
+    } catch {
+      return failed()
+    }
   })
 }
 
@@ -272,6 +249,15 @@ async function audit($: EngineInterface) {
   const parsed = safeJson(await bin($, 'tokendoctor-audit', ['--json'])) as { findings?: menu.Finding[] }
   if (Array.isArray(parsed?.findings)) findings = parsed.findings
   return findings
+}
+
+// Where Claude Code's guard sends compaction past the mods a person installs, the slide would be on
+// and never run: say so once at the start, with the way out (lib/guard.mjs).
+async function warnIfBlocked($: EngineInterface, slideOn: boolean) {
+  const found = await audit($)
+  if (slideOn && found.some(f => f.id === 'slide-blocked-by-guard')) {
+    $.ui.toast('tokendoctor: the slide cannot run under this login, Claude Code will summarize. /tokendoctor slide says why.', { timeoutMs: 12_000 })
+  }
 }
 
 // The changes tokendoctor wrote, or one of them put back: typed by number, applied as typed.
