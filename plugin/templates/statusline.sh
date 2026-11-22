@@ -11,28 +11,36 @@
 input=$(cat)
 command -v jq >/dev/null 2>&1 || { echo "tokendoctor status line needs jq"; exit 0; }
 
-# One jq pass reads every field. Tokens in context: the last request's input plus cache reads and
-# writes. current_usage is null before the first call and right after /compact; then the count
-# shows "--" rather than a stale number. Payloads without the field fall back to total_input_tokens.
-eval "$(jq -r '
+# One jq pass reads every field, each ended by a NUL byte so empty values and spaces survive, read
+# into variables in this order with no eval. Tokens in context: the last request's input plus cache
+# reads and writes. current_usage is null before the first call and right after /compact; then the
+# count shows "--" rather than a stale number. Payloads without the field fall back to
+# total_input_tokens.
+FIELDS=(MODEL MODEL_ID DIR TOKENS WINDOW COST HIT WARM CACHE_AT RESEND H5 H5_AT D7 D7_AT)
+i=0
+while IFS= read -r -d '' value; do
+  [ "$i" -lt "${#FIELDS[@]}" ] && printf -v "${FIELDS[$i]}" '%s' "$value"
+  i=$((i + 1))
+done < <(jq -j '
   (.context_window // {}) as $c | ($c.current_usage // {}) as $u
   | ((($u.input_tokens // 0) + ($u.cache_creation_input_tokens // 0) + ($u.cache_read_input_tokens // 0))) as $n
   | def int: if . == null then "" else floor end;
-  @sh "MODEL=\(.model.display_name // "?")",
-  @sh "MODEL_ID=\(.model.id // "")",
-  @sh "DIR=\(.workspace.current_dir // ".")",
-  @sh "TOKENS=\(if $n > 0 then $n | floor elif ($c | has("current_usage")) then "" else ($c.total_input_tokens // 0 | floor) end)",
-  @sh "WINDOW=\($c.context_window_size // 0 | floor)",
-  @sh "COST=\(.cost.total_cost_usd // 0)",
-  @sh "HIT=\(.prompt_cache.hit_ratio | if . == null then "" else (. * 100 | floor) end)",
-  @sh "WARM=\(.prompt_cache.warm // "")",
-  @sh "CACHE_AT=\(.prompt_cache.expires_at | int)",
-  @sh "RESEND=\(.prompt_cache.recache_tokens_if_cold | int)",
-  @sh "H5=\(.rate_limits.five_hour.used_percentage | int)",
-  @sh "H5_AT=\(.rate_limits.five_hour.resets_at | int)",
-  @sh "D7=\(.rate_limits.seven_day.used_percentage | int)",
-  @sh "D7_AT=\(.rate_limits.seven_day.resets_at | int)"
-' <<<"$input")"
+  (.model.display_name // "?"),
+  (.model.id // ""),
+  (.workspace.current_dir // "."),
+  (if $n > 0 then $n | floor elif ($c | has("current_usage")) then "" else ($c.total_input_tokens // 0 | floor) end),
+  ($c.context_window_size // 0 | floor),
+  (.cost.total_cost_usd // 0),
+  (.prompt_cache.hit_ratio | if . == null then "" else (. * 100 | floor) end),
+  (.prompt_cache.warm // ""),
+  (.prompt_cache.expires_at | int),
+  (.prompt_cache.recache_tokens_if_cold | int),
+  (.rate_limits.five_hour.used_percentage | int),
+  (.rate_limits.five_hour.resets_at | int),
+  (.rate_limits.seven_day.used_percentage | int),
+  (.rate_limits.seven_day.resets_at | int)
+  | "\(.)\u0000"
+' <<<"$input")
 
 DIM='\033[2m'; CYAN='\033[36m'; GREEN='\033[32m'; YELLOW='\033[33m'; RED='\033[31m'; RESET='\033[0m'
 NOW=${TOKENDOCTOR_NOW:-$(date +%s)}

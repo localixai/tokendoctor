@@ -12,6 +12,9 @@
 - **The plugin moved into `plugin/`.** The repository keeps its site, benchmark and tests beside
   it; an install, the plugin directory and `tokendoctor-org-install` take that folder alone.
   Install and update as before: the marketplace points at the new folder.
+- **The status line reads its fields without `eval`.** jq hands them over one by one and the
+  script reads each into its variable, so nothing it receives is ever run as code. A status line
+  installed before keeps its own copy, which still works, until it is installed again.
 - **The README says what the hooks module does:** each hook, the programs it runs and the one
   network call.
 
