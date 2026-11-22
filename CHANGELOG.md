@@ -17,6 +17,10 @@
   installed before keeps its own copy, which still works, until it is installed again.
 - **The README says what the hooks module does:** each hook, the programs it runs and the one
   network call.
+- **A privacy page:** [tokendoctor.localix.ai/privacy](https://tokendoctor.localix.ai/privacy) says
+  what the plugin reads, each file it keeps and what it sends, and the README links it with where to
+  ask for help.
+- **The publisher is Localix Lab,** in the manifest and the marketplace.
 
 ## 0.6.1
 

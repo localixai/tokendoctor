@@ -39,6 +39,7 @@ const site: SiteConfig = {
       { label: 'Docs', href: '/docs' },
       { label: 'GitHub', href: GITHUB },
       { label: 'Changelog', href: `${GITHUB}/blob/main/CHANGELOG.md` },
+      { label: 'Privacy', href: '/privacy' },
     ],
   },
   // The landing's WebSite gets these: what it is, beyond a page about it.

@@ -135,6 +135,19 @@ once a day. It never switches your models on its own.
     It changes nothing about the call.
   - The three tools answer the optimize skill. `set_setting` asks you before it writes anything.
 
+## Privacy and support
+
+tokendoctor has no server and no account. From your transcripts it reads only the numbers: models,
+times, token usage, tool calls by name and the size of each result. Message text is dropped as it
+is read, and none of what it keeps in `~/.claude/tokendoctor/` holds any: the daily totals, the
+dashboard, the list of changes for undo, and a copy of the two docs pages. The numbers the optimize
+skill shows Claude stay in your session, like the rest of it. The
+[privacy page](https://tokendoctor.localix.ai/privacy) lists every file.
+
+- Questions and bugs: [GitHub issues](https://github.com/localixai/tokendoctor/issues).
+- A security problem: report it privately, as [SECURITY.md](SECURITY.md) says.
+- Privacy: [privacy@localix.ai](mailto:privacy@localix.ai).
+
 ## Documentation
 
 **[tokendoctor.localix.ai/docs](https://tokendoctor.localix.ai/docs)** has the rest: the
