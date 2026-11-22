@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 
-const script = join(dirname(fileURLToPath(import.meta.url)), '..', 'templates', 'statusline.sh')
+const script = join(dirname(fileURLToPath(import.meta.url)), '..', 'plugin', 'templates', 'statusline.sh')
 const hasJq = spawnSync('jq', ['--version']).status === 0
 const NOW = 1_000_000
 let dir

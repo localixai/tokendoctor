@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { historyPath, readHistory, recordHistory, trend } from '../lib/history.mjs'
-import { analyzeSession, daily, localDay } from '../lib/sessions.mjs'
+import { historyPath, readHistory, recordHistory, trend } from '../plugin/lib/history.mjs'
+import { analyzeSession, daily, localDay } from '../plugin/lib/sessions.mjs'
 
 let dir
 beforeEach(() => {
@@ -74,11 +74,11 @@ test('a date written twice keeps the last row', () => {
 test('the hook script prints nothing and the hook is async on startup only', () => {
   session('a', [turn(at(1))])
   const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-  const r = spawnSync(process.execPath, [join(root, 'bin', 'tokendoctor-record')], { encoding: 'utf8', env: { PATH: process.env.PATH, HOME: dir, CLAUDE_CONFIG_DIR: dir } })
+  const r = spawnSync(process.execPath, [join(root, 'plugin', 'bin', 'tokendoctor-record')], { encoding: 'utf8', env: { PATH: process.env.PATH, HOME: dir, CLAUDE_CONFIG_DIR: dir } })
   assert.equal(r.status, 0)
   assert.equal(r.stdout + r.stderr, '')
   assert.equal(readHistory(dir).length, 1)
-  const hook = JSON.parse(readFileSync(join(root, 'hooks', 'hooks.json'), 'utf8')).hooks.SessionStart[0]
+  const hook = JSON.parse(readFileSync(join(root, 'plugin', 'hooks', 'hooks.json'), 'utf8')).hooks.SessionStart[0]
   assert.equal(hook.matcher, 'startup')
   assert.equal(hook.hooks[0].async, true)
 })

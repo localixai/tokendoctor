@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { analyzeSession, cost, loadSessions, loadUsage, summarize } from '../lib/sessions.mjs'
+import { analyzeSession, cost, loadSessions, loadUsage, summarize } from '../plugin/lib/sessions.mjs'
 
 let n = 0
 const turn = (minute, usage, { model = 'claude-opus-5-5', id } = {}) => ({
@@ -126,7 +126,7 @@ test('the CLI reads transcripts under the config folder and prints no message te
     writeFileSync(join(proj, 's1.jsonl'), [secret, today(turn(0, u(1000, 100)))].map((r) => JSON.stringify(r)).join('\n'))
     writeFileSync(join(proj, 's1', 'subagents', 'agent-1.jsonl'), JSON.stringify(today(turn(1, u(1000, 100)))))
     writeFileSync(join(proj, 's1', 'subagents', 'agent-1.meta.json'), JSON.stringify({ agentType: 'Explore' }))
-    const bin = join(dirname(fileURLToPath(import.meta.url)), '..', 'bin', 'tokendoctor-sessions')
+    const bin = join(dirname(fileURLToPath(import.meta.url)), '..', 'plugin', 'bin', 'tokendoctor-sessions')
     const r = spawnSync(process.execPath, [bin, '--json'], { encoding: 'utf8', env: { PATH: process.env.PATH, HOME: dir, CLAUDE_CONFIG_DIR: dir } })
     assert.equal(r.status, 0, r.stderr)
     const out = JSON.parse(r.stdout)

@@ -3,8 +3,8 @@ import { mkdtempSync, readFileSync, utimesSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { docsIndex, loadDocs, parseEnvVars, parseSettingsKeys } from '../lib/docs.mjs'
-import { runRules } from '../lib/rules.mjs'
+import { docsIndex, loadDocs, parseEnvVars, parseSettingsKeys } from '../plugin/lib/docs.mjs'
+import { runRules } from '../plugin/lib/rules.mjs'
 
 const SETTINGS = `# Settings reference
 

@@ -9,6 +9,9 @@
   says which settings apply live. The `config_list` and `config_set` tools are gone.
 - **A failed hook answers instead of vanishing.** A tool whose hook fails says so, and a slide that
   fails leaves Claude Code's own summary to run.
+- **The plugin moved into `plugin/`.** The repository keeps its site, benchmark and tests beside
+  it; an install, the plugin directory and `tokendoctor-org-install` take that folder alone.
+  Install and update as before: the marketplace points at the new folder.
 - **The README says what the hooks module does:** each hook, the programs it runs and the one
   network call.
 

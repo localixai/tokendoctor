@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, statSync, mkdtempSync, readdirSync, readFileSync
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, test } from 'node:test'
-import { applyOps, describePlan, diffLines, planFix, writePlan } from '../lib/apply.mjs'
+import { applyOps, describePlan, diffLines, planFix, writePlan } from '../plugin/lib/apply.mjs'
 
 let dir
 let project

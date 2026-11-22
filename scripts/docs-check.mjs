@@ -6,8 +6,8 @@
 import { readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { docsIndex, loadDocs } from '../lib/docs.mjs'
-import { TUNABLES } from '../lib/tunables.mjs'
+import { docsIndex, loadDocs } from '../plugin/lib/docs.mjs'
+import { TUNABLES } from '../plugin/lib/tunables.mjs'
 
 const root = new URL('..', import.meta.url).pathname
 const docs = await loadDocs(join(process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude'), 'tokendoctor', 'docs'), { offline: process.argv.includes('--offline') })
@@ -24,7 +24,7 @@ for (const [key, t] of Object.entries(TUNABLES)) {
   if (path.startsWith('env.')) env.add(path.slice(4))
   else if (!path.startsWith('pluginConfigs.')) settings.add(path.split('.')[0])
 }
-const source = ['lib/collect.mjs', 'lib/rules.mjs', 'lib/sessions.mjs', 'templates/statusline.sh'].map((f) => readFileSync(join(root, f), 'utf8')).join('\n')
+const source = ['plugin/lib/collect.mjs', 'plugin/lib/rules.mjs', 'plugin/lib/sessions.mjs', 'plugin/templates/statusline.sh'].map((f) => readFileSync(join(root, f), 'utf8')).join('\n')
 for (const m of source.matchAll(/settings\[\w+\]\.([a-zA-Z]+)/g)) settings.add(m[1])
 for (const m of source.matchAll(/['"`]((?:CLAUDE|ANTHROPIC|DISABLE|ENABLE|MAX|BASH|FORCE)_[A-Z0-9_]+)['"`]/g)) env.add(m[1])
 // Named on purpose because Claude Code does not have them (a rule says so).

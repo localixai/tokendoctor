@@ -43,7 +43,7 @@ export function arm(spec: string): Arm {
   const label = eq < 0 ? head : spec.slice(0, eq);
   const profile = m[1] as Arm["profile"], slide = Boolean(m[2]), reads = Boolean(m[4]);
   const uses = slide || reads || profile === "advised";
-  const plugin = uses ? path.resolve(folder ?? REPO) : null;
+  const plugin = uses ? path.resolve(folder ?? path.join(REPO, "plugin")) : null;
   if (plugin && !fs.existsSync(path.join(plugin, ".claude-plugin", "plugin.json"))) throw new Error(`--arm ${spec}: no plugin at ${plugin}`);
   return { label, profile, slide, slideTo: slide ? Number(m[3] ?? 25) : null, reads, plugin, version: plugin ? version(plugin) : null };
 }

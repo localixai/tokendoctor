@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { all, complete, every, explain, NAMES, op, overview, parse, resolve, undoList, unknown, value } from '../lib/console.mjs'
-import { TUNABLES } from '../lib/tunables.mjs'
+import { all, complete, every, explain, NAMES, op, overview, parse, resolve, undoList, unknown, value } from '../plugin/lib/console.mjs'
+import { TUNABLES } from '../plugin/lib/tunables.mjs'
 
 const findings = [
   { id: 'subagents-on-top-model', severity: 'warn', title: 'Subagents run on Opus', fixes: [{ scope: 'user', ops: [{ op: 'set', key: 'env.CLAUDE_CODE_SUBAGENT_MODEL', value: 'sonnet' }] }] },

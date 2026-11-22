@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 
-const bin = (name) => join(dirname(fileURLToPath(import.meta.url)), '..', 'bin', name)
+const bin = (name) => join(dirname(fileURLToPath(import.meta.url)), '..', 'plugin', 'bin', name)
 let dir
 let project
 let env

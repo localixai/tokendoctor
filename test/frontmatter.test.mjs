@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const files = [
-  ...readdirSync(join(root, 'templates', 'agents')).map((f) => join(root, 'templates', 'agents', f)),
-  ...readdirSync(join(root, 'skills')).map((d) => join(root, 'skills', d, 'SKILL.md')),
+  ...readdirSync(join(root, 'plugin', 'templates', 'agents')).map((f) => join(root, 'plugin', 'templates', 'agents', f)),
+  ...readdirSync(join(root, 'plugin', 'skills')).map((d) => join(root, 'plugin', 'skills', d, 'SKILL.md')),
 ]
 
 // GitHub and strict YAML parsers reject an unquoted value that contains ": " or " #".

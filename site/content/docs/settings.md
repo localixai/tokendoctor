@@ -75,7 +75,7 @@ The names in capitals are environment variables, written under `env` in the sett
 
 ## What it never changes
 
-Only settings on [the tunable list](https://github.com/localixai/tokendoctor/blob/main/lib/tunables.mjs) and `/config` rows. Hooks, permissions and anything that widens what Claude may do are never on it, so a model driving these tools cannot grant itself more.
+Only settings on [the tunable list](https://github.com/localixai/tokendoctor/blob/main/plugin/lib/tunables.mjs) and `/config` rows. Hooks, permissions and anything that widens what Claude may do are never on it, so a model driving these tools cannot grant itself more.
 
 ## With a model: optimize
 

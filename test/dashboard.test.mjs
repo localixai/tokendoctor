@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { collect, render } from '../lib/dashboard.mjs'
+import { collect, render } from '../plugin/lib/dashboard.mjs'
 
 function config() {
   const dir = mkdtempSync(join(tmpdir(), 'td-dash-'))
@@ -75,7 +75,7 @@ test('edge cases: no sessions, broken lines, responses without usage or a timest
 
 test('the CLI writes all of a large --json to a pipe and refuses a bad --days', async () => {
   const { spawnSync } = await import('node:child_process')
-  const bin = new URL('../bin/tokendoctor-dashboard', import.meta.url).pathname
+  const bin = new URL('../plugin/bin/tokendoctor-dashboard', import.meta.url).pathname
   const dir = config()
   const ok = spawnSync('node', [bin, '--json'], { env: { ...process.env, CLAUDE_CONFIG_DIR: dir }, encoding: 'utf8' })
   assert.equal(ok.status, 0)

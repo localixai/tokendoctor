@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { blockedNote, dropInSettings, guardState, ORG_ID, orgPaths } from '../lib/guard.mjs'
+import { blockedNote, dropInSettings, guardState, ORG_ID, orgPaths } from '../plugin/lib/guard.mjs'
 
 const team = { organizationType: 'claude_team' }
 const installed = (platform = 'darwin') => dropInSettings(platform)

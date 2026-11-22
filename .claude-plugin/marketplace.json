@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "tokendoctor",
-      "source": "./",
+      "source": "./plugin",
       "description": "The same Claude Code for up to 38% less. Replays your own past sessions to show what each change would have saved, then changes only what you pick."
     }
   ]

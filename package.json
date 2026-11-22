@@ -1,14 +1,14 @@
 {
-  "name": "tokendoctor",
-  "version": "0.6.1",
+  "name": "tokendoctor-repo",
   "private": true,
   "description": "The same Claude Code for up to 38% less. Replays your own past sessions to show what each change would have saved, then changes only what you pick.",
   "type": "module",
   "license": "MIT",
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "test:mod": "node scripts/test-mod.mjs",
-    "validate": "claude plugin validate . --strict",
-    "docs:check": "node scripts/docs-check.mjs"
+    "test:mod": "claude plugin test plugin",
+    "validate": "claude plugin validate plugin --strict && claude plugin validate . --strict",
+    "docs:check": "node scripts/docs-check.mjs",
+    "plugin:files": "node scripts/plugin-files.mjs"
   }
 }

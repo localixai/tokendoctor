@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { compareVersions, modelFamily, ruleIds, runRules } from '../lib/rules.mjs'
+import { compareVersions, modelFamily, ruleIds, runRules } from '../plugin/lib/rules.mjs'
 
 // A configuration that triggers no rule: each test changes one thing and expects one finding.
 function clean(overrides = {}) {

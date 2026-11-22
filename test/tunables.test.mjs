@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { parseValue, TUNABLES, tunableOp } from '../lib/tunables.mjs'
+import { parseValue, TUNABLES, tunableOp } from '../plugin/lib/tunables.mjs'
 
 test('values are checked per key and env values are written as strings', () => {
   assert.deepEqual(tunableOp('autoCompactWindow', 400000), { op: 'set', key: 'autoCompactWindow', value: 400000 })
@@ -39,7 +39,7 @@ test('parseValue reads JSON and keeps plain text', () => {
 test('tokendoctor-set dry-runs, then writes with a backup into a sandbox config', () => {
   const dir = mkdtempSync(join(tmpdir(), 'tokendoctor-set-'))
   try {
-    const bin = join(dirname(fileURLToPath(import.meta.url)), '..', 'bin', 'tokendoctor-set')
+    const bin = join(dirname(fileURLToPath(import.meta.url)), '..', 'plugin', 'bin', 'tokendoctor-set')
     const run = (...a) => spawnSync(process.execPath, [bin, ...a], { encoding: 'utf8', env: { PATH: process.env.PATH, HOME: dir, CLAUDE_CONFIG_DIR: dir } })
     const dry = run('promptSuggestionEnabled', 'false')
     assert.equal(dry.status, 0, dry.stderr)

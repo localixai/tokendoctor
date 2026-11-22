@@ -4,7 +4,7 @@
 npm test                  # lib/ and bin/, on Node 20 or newer
 npm run test:mod          # the hooks module (needs claude on PATH)
 npm run docs:check        # every settings key and variable against Claude Code's docs (network)
-claude --plugin-dir .     # the working tree in a real session, without installing it
+claude --plugin-dir plugin  # the working tree in a real session, without installing it
 ```
 
 ## What a change has to keep
@@ -36,5 +36,5 @@ publishes it.
 
 ## Releases
 
-Bump `version` in `package.json` and `.claude-plugin/plugin.json` together and move the changelog's
+Bump `version` in `plugin/package.json` and `plugin/.claude-plugin/plugin.json` together and move the changelog's
 **Unreleased** under that version, then tag `v<version>`.

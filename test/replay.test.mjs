@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { leftAfterCompaction, replay, request, RESERVE } from '../lib/replay.mjs'
+import { leftAfterCompaction, replay, request, RESERVE } from '../plugin/lib/replay.mjs'
 
 // Opus 5.5's prices per token: a cache read, a 1-hour write, output.
 const P = { read: 0.2e-6, write: 8e-6, out: 20e-6 }

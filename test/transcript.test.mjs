@@ -4,13 +4,13 @@ import { appendFileSync, mkdirSync, mkdtempSync, rmSync, statSync, truncateSync,
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { collect } from '../lib/dashboard.mjs'
-import { parseDebugLog } from '../lib/debuglog.mjs'
-import { analyzeSession } from '../lib/sessions.mjs'
-import { LINE_MAX, lines, readOr, readRows } from '../lib/transcript.mjs'
+import { collect } from '../plugin/lib/dashboard.mjs'
+import { parseDebugLog } from '../plugin/lib/debuglog.mjs'
+import { analyzeSession } from '../plugin/lib/sessions.mjs'
+import { LINE_MAX, lines, readOr, readRows } from '../plugin/lib/transcript.mjs'
 
 const tmp = () => mkdtempSync(join(tmpdir(), 'td-transcript-'))
-const bin = (name) => new URL(`../bin/${name}`, import.meta.url).pathname
+const bin = (name) => new URL(`../plugin/bin/${name}`, import.meta.url).pathname
 
 /** V8's longest string, in characters (0x1fffffe8): readFileSync(file, 'utf8') throws past it. */
 const LONGEST_STRING = 0x1fffffe8

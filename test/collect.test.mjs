@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, test } from 'node:test'
-import { collect } from '../lib/collect.mjs'
+import { collect } from '../plugin/lib/collect.mjs'
 
 let dir
 let project

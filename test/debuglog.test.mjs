@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { debugFindings, parseDebugLog } from '../lib/debuglog.mjs'
+import { debugFindings, parseDebugLog } from '../plugin/lib/debuglog.mjs'
 
 const at = '2026-11-06T01:26:35.308Z [DEBUG] '
 const lines = (...xs) => xs.map((x) => (x.startsWith('2026') ? x : at + x)).join('\n')
