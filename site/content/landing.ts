@@ -108,7 +108,8 @@ const CARDS: Card[] = [
       [
         shell('$ tokendoctor-sessions --days 30'),
         ui(
-          [['hi', '[info] keepalive-would-save'], ['', ': Keeping the prompt cache warm through pauses would have saved 1.7% here']],
+          [['hi', '[info] keepalive-would-save']],
+          [['', '  Keeping the prompt cache warm through pauses would have saved '], ['ok', '1.7%'], ['', ' here']],
           [['dim', '  Of 23 pauses longer than 54 minutes, 9 would have come back to a warm cache:']],
           [['dim', '  '], ['ok', '$26.21'], ['dim', ' of cache rewrites saved for '], ['', '$5.51'], ['dim', ' of pings (81).']],
           [['dim', '  In 12 the pings ran out first, and in 2 you came back within the hour.']],

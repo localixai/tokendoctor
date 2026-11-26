@@ -42,13 +42,13 @@ On an API key the cache lives 5 minutes unless you set `/tokendoctor cache 1h`, 
 
 ## What it costs
 
-On a plan a ping uses a little of your usage limit, as a rewrite does; on an API key it costs money. `/tokendoctor:sessions` replays the same rules over your past sessions (the `keepalive-would-save` finding): how many pauses would have come back to a warm cache, what the rewrites it saved would have cost, what the pings would have cost, and how many pauses were pinged for nothing.
+On a plan a ping uses a little of your usage limit, as a rewrite does; on an API key it costs money. `/tokendoctor:sessions` replays the same rules over your past sessions (the `keepalive-would-save` finding): how many pauses would have come back to a warm cache, what the rewrites it saved would have cost, what the pings would have cost, and how many pauses the pings did not help: those where they ran out before you came back, and those where you came back within the hour anyway.
 
 ## Checked on a live session
 
 One Claude Code session on Sonnet 5.5, on 26 November 2026, with a ping at minute 54 and nothing else in between:
 
-| Minute | Request | Read from the cache | Written again |
+| Minute | Request | Read from cache | Written |
 | --- | --- | --- | --- |
 | 0 | yours | 21,877 | 0 |
 | 54 | the ping | 21,880 | 0 |
