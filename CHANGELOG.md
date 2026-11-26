@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.0
 
 - **The prompt cache can stay warm through a break** (`tokendoctor.keepalive`, off by default;
   `/tokendoctor keepalive on`). Come back after the cache's hour and the next message writes the
@@ -19,6 +19,8 @@
   rules replayed over your past pauses, with the rewrites saved, what the pings cost and the pauses
   they did not help. On the author's server: 1.7% of all cost.
 - **A page for it in the docs,** tokendoctor.localix.ai/docs/keepalive, and a card on the landing page.
+- **Docs pages have a Copy page button,** from the site template: the page as Markdown, to copy or to
+  open in an assistant.
 
 ## 0.6.1
 
