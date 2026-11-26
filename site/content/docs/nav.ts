@@ -17,8 +17,8 @@ const docs: DocsConfig = {
     },
     {
       title: 'Fix',
-      blurb: 'The checks, the settings, the slide, and the way back.',
-      pages: ['audit', 'settings', 'slide', 'undo'],
+      blurb: 'The checks, the settings, the slide, the cache keepalive, and the way back.',
+      pages: ['audit', 'settings', 'slide', 'keepalive', 'undo'],
     },
     {
       title: 'Reference',

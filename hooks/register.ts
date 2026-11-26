@@ -1,4 +1,5 @@
 import type { EngineInterface, Register } from 'claude-code'
+import { keepaliveCompact, keepaliveForget, registerKeepalive } from './keepalive'
 import { calibrate, chars, dedupe, IMAGE_TOKENS, imagesIn, slide } from './window'
 import * as menu from '../lib/console.mjs'
 
@@ -16,6 +17,8 @@ const WRITES: string[] = [tool('config_set'), tool('set_setting')]
 const text = (value: unknown) => ({ result: typeof value === 'string' ? value : JSON.stringify(value, null, 1) })
 
 export const register: Register = (on, options) => {
+  // Keeping the prompt cache warm through a pause (hooks/keepalive.ts).
+  registerKeepalive(on)
   // The options are the ones /tokendoctor writes (pluginConfigs of tokendoctor@tokendoctor). The copy
   // tokendoctor-org-install puts in the system folder has another id, so it reads them from there at
   // session start rather than keep a second set that could disagree.
@@ -42,11 +45,9 @@ export const register: Register = (on, options) => {
   })
 
   on('session.start', async ($, e, next) => {
+    keepaliveForget()
     const result = await next(e)
-    const shared = await $.settings
-      .read()
-      .then(s => (s as { pluginConfigs?: Record<string, { options?: Record<string, unknown> }> }).pluginConfigs?.[USER_ID]?.options)
-      .catch(() => undefined)
+    const shared = await pluginOptions($).catch(() => undefined)
     if (shared && 'slide' in shared) slideOn = shared.slide === true
     if (shared && 'slideTo' in shared) slideTo = clampSlideTo(shared.slideTo)
     await $.tool.register({
@@ -138,6 +139,8 @@ export const register: Register = (on, options) => {
   // In place of a summary where Claude Code compacts, the window slides (hooks/window.ts). A /compact
   // the person types still summarizes, and so does a slide that cannot free enough.
   on('session.compact', async ($, e, next) => {
+    const kept = await keepaliveCompact($, e)
+    if (kept) return kept
     if (!slideOn || e.agentId !== undefined) return next(e)
     // A summary computed ahead of time is a model request a slide never uses.
     if (e.trigger === 'precompute') return { skip: 'tokendoctor slides the window instead' }
@@ -320,6 +323,12 @@ async function confirm($: EngineInterface, change: string) {
 async function bin($: EngineInterface, name: string, args: string[]) {
   const { exitCode, stdout, stderr } = await $.process.run(['node', `${$.plugin.root}/bin/${name}`, ...args], { timeoutMs: 120_000 })
   return exitCode === 0 ? stdout : `${name} failed (${exitCode}): ${stderr || stdout}`
+}
+
+/** tokendoctor's options as the settings hold them now (pluginConfigs of tokendoctor@tokendoctor). */
+async function pluginOptions($: EngineInterface) {
+  const s = (await $.settings.read()) as { pluginConfigs?: Record<string, { options?: Record<string, unknown> }> }
+  return s.pluginConfigs?.[USER_ID]?.options
 }
 
 function clampSlideTo(v: unknown) {

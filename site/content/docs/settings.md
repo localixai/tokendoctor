@@ -45,6 +45,7 @@ Tab completes the names and their values. Every change is listed by [undo](undo.
 | `max-effort` | `maxEffortLevel` | `medium`, `high`, `xhigh`, `max` |
 | `slide` | tokendoctor's [slide](slide.md) | `on`, `off` |
 | `slide-to` | how far a slide frees the context | 20 to 90 percent |
+| `keepalive` | tokendoctor's [cache keepalive](keepalive.md) | `on`, `off` |
 | `cache` | `promptCacheTtl` | `5m`, `1h` |
 | `subagent-cache` | `subagentPromptCacheTtl` | `5m`, `1h` |
 | `model` | `model` | a model alias or a `claude-…` id |

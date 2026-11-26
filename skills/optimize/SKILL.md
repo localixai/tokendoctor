@@ -38,6 +38,12 @@ The tokendoctor tools wait behind ToolSearch: load `mcp__tokendoctor__metrics`,
    now and then read an elided file again. If the audit has `slide-blocked-by-guard`, the slide will
    not run on this login until `tokendoctor-org-install` is run (one `sudo` command): say so before
    turning it on.
+   **The cache keepalive.** `tokendoctor.keepalive: true` sends a one-word fork shortly before the
+   main conversation's one-hour prompt cache expires, so a pause does not end in a rewrite of the
+   whole context. Propose it only with the `keepalive-would-save` finding, and quote its numbers
+   (rewrites saved, what the pings cost, the pauses pinged for nothing); on a plan a ping spends a
+   little of the usage limit, not money. It does nothing on a 5-minute cache: there, `promptCacheTtl:
+   "1h"` comes first.
    **How tools are used.** The `usage` part of `tokendoctor-sessions --json` shows which tools fill
    the context, Bash calls that only printed a file, the files read most and how large subagent runs
    grow. Judge from it yourself. `bashOutputMaxChars` caps one Bash output; with the slide on, a

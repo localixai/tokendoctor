@@ -24,6 +24,12 @@
       "description": "Where Claude Code would summarize the conversation, elide old tool outputs instead (they can be read again): no summary request, every prompt and answer kept word for word. /compact still summarizes.",
       "default": false
     },
+    "keepalive": {
+      "type": "boolean",
+      "title": "Keep the prompt cache warm through a pause",
+      "description": "Shortly before the one-hour prompt cache of a conversation of 200K tokens or more expires, send a one-word fork of it, so the next message reads the conversation from the cache instead of writing it again. Never on a cache that may be cold; a few pings a pause, fewer when you rarely come back.",
+      "default": false
+    },
     "slideTo": {
       "type": "number",
       "title": "Slide down to (% of where Claude Code compacts)",

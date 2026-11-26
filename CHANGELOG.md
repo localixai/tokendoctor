@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+
+- **The prompt cache can stay warm through a break** (`tokendoctor.keepalive`, off by default;
+  `/tokendoctor keepalive on`). Come back after the cache's hour and the next message writes the
+  whole conversation into it again, at twice the input price. Six minutes before the hour runs out,
+  tokendoctor now sends a one-word fork of the conversation, which reads it from the cache and
+  starts the hour again. It does so only for conversations of 200K tokens or more, and only when it
+  knows the cache is warm: when the last request went, that its cache lives an hour, and that more
+  than 2 minutes are left. Anything it cannot read, a timer that wakes late after the laptop slept,
+  a ping that had to write the conversation back, a rate limit or an error, and there are no more
+  pings until your next message. A pause starts with 4 pings and learns from your own pauses, from
+  2 to 6; at most 3 an hour and 30 a day on the machine, none past 80% of a plan limit. Claude Code's
+  idle compaction waits while the pings keep the cache. Checked on a live session on Sonnet 5.5: a
+  message 70 minutes after the one before it, with a ping at minute 54, still read the whole
+  conversation from the cache.
+- **`/tokendoctor:sessions` says what it would have saved you** (`keepalive-would-save`): the same
+  rules replayed over your past pauses, with the rewrites saved, what the pings cost and the pauses
+  they did not help. On the author's server: 1.7% of all cost.
+- **A page for it in the docs,** tokendoctor.localix.ai/docs/keepalive, and a card on the landing page.
+
 ## 0.6.1
 
 - **Fable 5.2 and Mythos 5.2 have prices.** Responses from `claude-fable-5-2` counted as unpriced, so

@@ -48,6 +48,13 @@ ones you pick, each shown as a diff first. `/tokendoctor undo` puts any of them 
 conversation, tokendoctor drops old tool output instead and keeps every message. There is no model
 call, so it takes milliseconds, not a minute.
 
+**④ Optional: keep the cache warm through a break.** Come back after the prompt cache's hour and
+the next message writes the whole conversation into it again, at twice the input price. With
+`/tokendoctor keepalive on`, a one-word fork of the conversation reads it from the cache six minutes
+before the hour runs out, which starts the hour again. Only conversations of 200K tokens or more,
+and never on a cache that may already be cold. `/tokendoctor:sessions` shows first what it would
+have saved you.
+
 ## Install
 
 ```bash
@@ -116,7 +123,7 @@ once a day. It never switches your models on its own.
 [38 checks](https://tokendoctor.localix.ai/docs/audit), every
 [setting](https://tokendoctor.localix.ai/docs/settings),
 [how the slide works](https://tokendoctor.localix.ai/docs/slide) (and Team and Enterprise
-logins), the commands from a shell, the [measurements](https://tokendoctor.localix.ai/docs/proof)
+logins), [the cache keepalive](https://tokendoctor.localix.ai/docs/keepalive), the commands from a shell, the [measurements](https://tokendoctor.localix.ai/docs/proof)
 and the [limits](https://tokendoctor.localix.ai/docs/limits). To work on tokendoctor itself, see
 [CONTRIBUTING.md](CONTRIBUTING.md).
 

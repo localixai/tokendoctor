@@ -4,7 +4,8 @@ import type { Block, Card, LandingContent, Line, Media } from '@/shared/config';
 // shows here is what tokendoctor printed when it ran, trimmed to fit, with a temporary folder's
 // path written as the settings file it stands for: the replay is the author's last 45 days, the
 // fix an audit and a dry run on a fresh Claude Code config, the slide two compactions of one real
-// session (a summary at night, the slide in the afternoon), the undo `/tokendoctor` and
+// session (a summary at night, the slide in the afternoon), the keepalive `tokendoctor-sessions` on
+// the author's server (2026-11-26), the undo `/tokendoctor` and
 // `/tokendoctor undo`. The dashboard is the top of the author's own, captured at 1440×900.
 const DOCS = '/docs';
 const GITHUB = 'https://github.com/localixai/tokendoctor';
@@ -99,6 +100,24 @@ const CARDS: Card[] = [
     ),
   },
   {
+    tag: 'Keep',
+    title: 'Keep the cache through a break',
+    text: 'Back after the cache’s hour, the next message writes the whole conversation into it again, at twice the input price. A one-word fork six minutes before the hour runs out keeps it warm, and never goes to a cache that may be cold: `/tokendoctor keepalive on`.',
+    links: [{ href: `${DOCS}/keepalive`, label: 'The keepalive' }],
+    media: terminal(
+      [
+        shell('$ tokendoctor-sessions --days 30'),
+        ui(
+          [['hi', '[info] keepalive-would-save'], ['', ': Keeping the prompt cache warm through pauses would have saved 1.7% here']],
+          [['dim', '  Of 23 pauses longer than 54 minutes, 9 would have come back to a warm cache:']],
+          [['dim', '  '], ['ok', '$26.21'], ['dim', ' of cache rewrites saved for '], ['', '$5.51'], ['dim', ' of pings (81).']],
+          [['dim', '  In 12 the pings ran out first, and in 2 you came back within the hour.']],
+        ),
+      ],
+      'tokendoctor-sessions on the author’s server: keeping the prompt cache warm would have saved 1.7%; of 23 pauses longer than 54 minutes, 9 would have come back to a warm cache, $26.21 of rewrites saved for $5.51 of pings',
+    ),
+  },
+  {
     tag: 'Undo',
     title: 'Undo anything',
     text: 'Every setting by name, every change reversible. Costs no tokens: `/tokendoctor undo`.',
@@ -162,7 +181,7 @@ const landing: LandingContent = {
   },
   loop: {
     title: 'How it works',
-    aside: 'See, look, fix, slide, undo',
+    aside: 'See, look, fix, slide, keep, undo',
     cards: CARDS,
   },
   docs: { title: 'Documentation' },

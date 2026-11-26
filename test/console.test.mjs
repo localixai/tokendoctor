@@ -56,14 +56,15 @@ test('a bad value says what would do, and a plugin option is written under plugi
   assert.deepEqual(op(resolve('slide'), undefined).op, { op: 'unset', key: 'pluginConfigs.tokendoctor@tokendoctor.options.slide' })
 })
 
-test('the overview shows six settings, how to change them and the fixes the audit has', () => {
+test('the overview shows seven settings, how to change them and the fixes the audit has', () => {
   const merged = { promptCacheTtl: '1h', pluginConfigs: { 'tokendoctor@tokendoctor': { options: { slide: true } } } }
   const text = overview(merged, findings, 367000)
   assert.match(text, /window\s+default, compacts at 367K/)
   assert.match(text, /slide\s+on/)
+  assert.match(text, /keepalive\s+off/)
   assert.match(text, /cache\s+1h/)
   assert.match(text, /effort\s+default .*\(next session\)/)
-  assert.match(text, new RegExp(`${every().length - 6} more: /tokendoctor all`))
+  assert.match(text, new RegExp(`${every().length - 7} more: /tokendoctor all`))
   assert.match(text, /\/tokendoctor fix subagents-on-top-model\s+Subagents run on Opus/)
   assert.doesNotMatch(text, /main-model-expensive/)
   assert.ok(all({}).startsWith('every setting it changes'))
