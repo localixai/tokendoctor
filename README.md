@@ -53,7 +53,7 @@ the next message writes the whole conversation into it again, at twice the input
 `/tokendoctor keepalive on`, a one-word fork of the conversation reads it from the cache six minutes
 before the hour runs out, which starts the hour again. Only conversations of 200K tokens or more,
 and never on a cache that may already be cold. `/tokendoctor:sessions` shows first what it would
-have saved you.
+have saved you ([more below](#keep-the-cache-warm-through-a-break)).
 
 ## Install
 
@@ -102,6 +102,33 @@ show it, and you should leave your window alone. Every run, the losing ones too,
   <img src="docs/dashboard.png" alt="The author's tokendoctor dashboard: 57% of the spend was Claude re-reading the conversation" width="880"><br>
   <sub><code>/tokendoctor:dashboard</code>: where every token went, by day, model, subagent and project. One local file; this one is mine.</sub>
 </p>
+
+## Keep the cache warm through a break
+
+On a plan, Claude Code keeps the main conversation in the prompt cache for an hour. Come back
+later than that and the next message writes the whole conversation into the cache again, at twice
+the input price. With `/tokendoctor keepalive on`, six minutes before the hour runs out tokendoctor
+sends a one-word fork of the conversation. The fork reads the conversation from the cache, which
+starts the hour again, and adds nothing to yours.
+
+One live session on Sonnet 5.5, 26 November 2026, with a ping at minute 54 and nothing else in
+between:
+
+| Minute | Request | Read from cache | Written |
+| --- | --- | --- | --- |
+| 0 | yours | 21,877 | 0 |
+| 54 | the ping | 21,880 | 0 |
+| 70 | yours | 21,880 | 11 |
+
+It pings only conversations of 200K tokens or more, and only when it knows the cache is warm. A
+break starts with 4 pings, and the number moves between 2 and 6 as it learns from your breaks: at
+most 3 an hour and 30 a day on the machine, none past 80% of a plan limit.
+
+It is off by default because it rarely pays much. Over my last 30 days (41 sessions), 9 of 23
+breaks longer than 54 minutes would have come back to a warm cache: $26.21 of rewrites saved for
+$5.51 of pings, 1.6% of the month. In 12 the pings ran out before I came back, and in 2 I was back
+within the hour anyway. `/tokendoctor:sessions` runs the same replay over your own breaks. The
+rest is in [the docs](https://tokendoctor.localix.ai/docs/keepalive).
 
 ## Commands
 
