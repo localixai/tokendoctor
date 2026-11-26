@@ -59,7 +59,7 @@ export function renderDocsPage(route: string, template: string): string | undefi
   }
   const index = DOCS_NAV.index;
   const meta = page
-    ? { title: `${page.title} · ${SITE.name} docs`, headline: page.title, description: page.description, route }
+    ? { title: `${page.title} · ${SITE.name} docs`, headline: page.title, description: page.description, route, markdown: `${route}.md` }
     : { title: index.title, headline: index.title, description: index.description, route };
   const body = renderToStaticMarkup(<DocsLayout page={page} />);
   // Replaced by functions: a `$&` in a page is text, not a pattern.
@@ -67,6 +67,6 @@ export function renderDocsPage(route: string, template: string): string | undefi
 }
 
 export { landingHead } from './head';
-export { indexNowKey, llmsDocs, llmsFull, searchIndex, sitemap } from './files';
+export { indexNowKey, llmsDocs, llmsFull, markdownPages, searchIndex, sitemap } from './files';
 export { SEARCH_INDEX } from '@/pages/docs';
 export { IMAGES, REPO_FILES } from '@/entities/doc';
